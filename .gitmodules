@@ -1,0 +1,3 @@
+[submodule "e-kredit-pranata-ti/frontend"]
+	path = e-kredit-pranata-ti/frontend
+	url = git@github.com:071002231-dti/e-kredit-pranata-ti-frontend.git
