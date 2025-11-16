@@ -333,6 +333,6 @@ Kami menerima kontribusi! Silakan:
 
 ---
 
-**Made with ❤️ for Pranata Teknologi Informasi Indonesia**
+**Made with ❤️ for PTI Universitas Islam Indonesia**
 
 **Last Updated**: 2025-11-13 | **Version**: 1.0.0 | **Status**: ✅ Production Ready
