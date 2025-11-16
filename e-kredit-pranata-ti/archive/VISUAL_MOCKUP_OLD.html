@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>e-Kredit Pranata TI - Visual Mockup</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 40px;
+            font-size: 1.2em;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .tab {
+            background: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .tab:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .tab.active {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .content {
+            display: none;
+        }
+
+        .content.active {
+            display: block;
+        }
+
+        .mockup-container {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        /* WhatsApp Phone Mockup */
+        .phone {
+            width: 375px;
+            height: 750px;
+            background: #000;
+            border-radius: 40px;
+            padding: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .phone::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 25px;
+            background: #000;
+            border-radius: 0 0 20px 20px;
+            z-index: 2;
+        }
+
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            background: #e5ddd5;
+            border-radius: 30px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .phone-header {
+            background: #075e54;
+            color: white;
+            padding: 40px 15px 10px 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .phone-header-icon {
+            width: 40px;
+            height: 40px;
+            background: #25D366;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .phone-header-title {
+            flex: 1;
+        }
+
+        .phone-header-title h3 {
+            font-size: 16px;
+            margin-bottom: 2px;
+        }
+
+        .phone-header-title p {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .chat-area {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-image:
+                repeating-linear-gradient(45deg, rgba(255,255,255,.03) 0, rgba(255,255,255,.03) 2px, transparent 2px, transparent 4px);
+        }
+
+        .message {
+            margin-bottom: 15px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            text-align: right;
+        }
+
+        .message-bubble {
+            display: inline-block;
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-size: 14px;
+            line-height: 1.4;
+            white-space: pre-wrap;
+        }
+
+        .message.user .message-bubble {
+            background: #dcf8c6;
+            border-radius: 10px 10px 0 10px;
+        }
+
+        .message.bot .message-bubble {
+            background: white;
+            border-radius: 10px 10px 10px 0;
+            text-align: left;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .wa-button {
+            background: white;
+            border: 1px solid #075e54;
+            color: #075e54;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .wa-button:hover {
+            background: #075e54;
+            color: white;
+        }
+
+        /* Web Dashboard Mockup */
+        .dashboard {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 900px;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .dashboard-header h2 {
+            color: #333;
+            font-size: 28px;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-item {
+            color: #666;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .nav-item.active {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card h3 {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        .activity-table {
+            background: #f9f9f9;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .activity-table h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #075e54;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        tr:hover {
+            background: white;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status.approved {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.rejected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .badge {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge.whatsapp {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        /* Flow Mockup */
+        .flow-screen {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            width: 400px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .flow-screen h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #45a049;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196F3;
+        }
+
+        .info-box p {
+            color: #1976d2;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .mockup-container {
+                flex-direction: column;
+            }
+
+            .dashboard {
+                width: 100%;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📱 e-Kredit Pranata TI</h1>
+        <p class="subtitle">Visual Mockup - WhatsApp Integration</p>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('whatsapp')">📱 WhatsApp User</button>
+            <button class="tab" onclick="showTab('flow')">📝 Submit Flow</button>
+            <button class="tab" onclick="showTab('dashboard')">💻 Web Dashboard</button>
+        </div>
+
+        <!-- WhatsApp Chat Mockup -->
+        <div id="whatsapp" class="content active">
+            <div class="mockup-container">
+                <!-- Registration Flow -->
+                <div class="phone">
+                    <div class="phone-screen">
+                        <div class="phone-header">
+                            <div class="phone-header-icon">🤖</div>
+                            <div class="phone-header-title">
+                                <h3>e-Kredit Pranata TI</h3>
+                                <p>Online sekarang</p>
+                            </div>
+                        </div>
+                        <div class="chat-area">
+                            <div class="message user">
+                                <div class="message-bubble">
+                                    Halo
+                                </div>
+                                <div class="message-time">10:30</div>
+                            </div>
+                            <div class="message bot">
+                                <div class="message-bubble">
+👋 <strong>Selamat datang!</strong>
+
+Untuk menggunakan layanan ini, silakan daftarkan nomor WhatsApp Anda terlebih dahulu.
+
+<strong>Cara pendaftaran:</strong>
+/register email@example.com NIP123456
+
+Pastikan email dan NIP sesuai dengan yang terdaftar di sistem.
+                                </div>
+                                <div class="message-time">10:30</div>
+                            </div>
+                            <div class="message user">
+                                <div class="message-bubble">
+/register john.doe@pranata.id
+198501012010011001
+                                </div>
+                                <div class="message-time">10:31</div>
+                            </div>
+                            <div class="message bot">
+                                <div class="message-bubble">
+👋 <strong>Selamat datang di e-Kredit Pranata TI!</strong>
+
+Halo <strong>John Doe</strong>,
+
+Anda sekarang dapat mengajukan aktivitas dan memantau angka kredit Anda langsung melalui WhatsApp.
+
+Gunakan menu di bawah untuk memulai.
+                                </div>
+                                <div class="message-time">10:31</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Menu & Statistics -->
+                <div class="phone">
+                    <div class="phone-screen">
+                        <div class="phone-header">
+                            <div class="phone-header-icon">🤖</div>
+                            <div class="phone-header-title">
+                                <h3>e-Kredit Pranata TI</h3>
+                                <p>Online sekarang</p>
+                            </div>
+                        </div>
+                        <div class="chat-area">
+                            <div class="message bot">
+                                <div class="message-bubble">
+<strong>📋 Menu Utama</strong>
+
+Silakan pilih menu:
+                                    <div class="button-group">
+                                        <button class="wa-button">📝 Submit Aktivitas</button>
+                                        <button class="wa-button">📊 Statistik Saya</button>
+                                        <button class="wa-button">📋 Aktivitas Terkini</button>
+                                    </div>
+                                </div>
+                                <div class="message-time">10:32</div>
+                            </div>
+                            <div class="message user">
+                                <div class="message-bubble">
+📊 Statistik Saya
+                                </div>
+                                <div class="message-time">10:33</div>
+                            </div>
+                            <div class="message bot">
+                                <div class="message-bubble">
+📊 <strong>Statistik Angka Kredit Anda</strong>
+
+<strong>Total Angka Kredit:</strong> 87.5
+<strong>Unsur Utama:</strong> 75.0 (85.7%)
+<strong>Unsur Penunjang:</strong> 12.5 (14.3%)
+
+<strong>Target Unsur Utama (min 80%):</strong>
+████████░░ 85.7% ✅
+
+✅ <strong>Status: Memenuhi Persyaratan</strong>
+                                </div>
+                                <div class="message-time">10:33</div>
+                            </div>
+                            <div class="message bot">
+                                <div class="message-bubble">
+🎉 <strong>Aktivitas Disetujui</strong>
+
+<strong>Jenis Aktivitas:</strong>
+Pengembangan aplikasi
+
+<strong>Angka Kredit:</strong> 25.0
+
+Selamat! Aktivitas Anda telah disetujui dan angka kredit telah ditambahkan.
+                                </div>
+                                <div class="message-time">14:45</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- WhatsApp Flow Mockup -->
+        <div id="flow" class="content">
+            <div class="mockup-container">
+                <div class="flow-screen">
+                    <h3>📝 Submit Aktivitas - Screen 1</h3>
+                    <div class="info-box">
+                        <p><strong>Native WhatsApp Flow</strong> - Form ini tampil langsung di dalam WhatsApp tanpa membuka browser</p>
+                    </div>
+                    <div class="form-group">
+                        <label>Kategori Aktivitas</label>
+                        <select>
+                            <option>-- Pilih Kategori --</option>
+                            <option>Unsur Utama</option>
+                            <option selected>Unsur Penunjang</option>
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn btn-secondary">❌ Batal</button>
+                        <button class="btn btn-primary">Lanjut ➡️</button>
+                    </div>
+                </div>
+
+                <div class="flow-screen">
+                    <h3>📝 Submit Aktivitas - Screen 3</h3>
+                    <div class="info-box">
+                        <p>Isi detail aktivitas yang Anda kerjakan</p>
+                    </div>
+                    <div class="form-group">
+                        <label>Jenis Aktivitas</label>
+                        <select>
+                            <option selected>Pengembangan aplikasi berbasis web</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Jumlah (Aplikasi)</label>
+                        <input type="number" value="2" placeholder="Masukkan jumlah">
+                    </div>
+                    <div class="form-group">
+                        <label>Angka Kredit Total</label>
+                        <input type="text" value="25.0" readonly style="background: #f0f0f0;">
+                    </div>
+                    <div class="form-group">
+                        <label>Deskripsi</label>
+                        <textarea rows="3" placeholder="Jelaskan aktivitas Anda...">Mengembangkan aplikasi e-Kredit Pranata TI dengan integrasi WhatsApp</textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn btn-secondary">⬅️ Kembali</button>
+                        <button class="btn btn-primary">Lanjut ➡️</button>
+                    </div>
+                </div>
+
+                <div class="flow-screen">
+                    <h3>✅ Konfirmasi Pengajuan</h3>
+                    <div class="info-box">
+                        <p>Pastikan semua data sudah benar sebelum submit</p>
+                    </div>
+                    <div class="form-group">
+                        <strong>Kategori:</strong> Unsur Utama<br><br>
+                        <strong>Aktivitas:</strong> Pengembangan aplikasi berbasis web<br><br>
+                        <strong>Jumlah:</strong> 2 Aplikasi<br><br>
+                        <strong>Angka Kredit:</strong> 25.0<br><br>
+                        <strong>Periode:</strong> 01/11/2025 - 10/11/2025<br><br>
+                        <strong>Bukti:</strong> ✅ screenshot.jpg (uploaded)
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn btn-secondary">⬅️ Kembali</button>
+                        <button class="btn btn-primary">✅ Submit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Web Dashboard Mockup -->
+        <div id="dashboard" class="content">
+            <div class="mockup-container">
+                <div class="dashboard">
+                    <div class="dashboard-header">
+                        <h2>📊 Admin Dashboard</h2>
+                        <div class="nav-menu">
+                            <a href="#" class="nav-item active">Dashboard</a>
+                            <a href="#" class="nav-item">Persetujuan</a>
+                            <a href="#" class="nav-item">Laporan</a>
+                            <a href="#" class="nav-item">User</a>
+                        </div>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3>Total User</h3>
+                            <div class="value">156</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Total Kredit</h3>
+                            <div class="value">12,458</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Pending</h3>
+                            <div class="value">23</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Approved</h3>
+                            <div class="value">1,234</div>
+                        </div>
+                    </div>
+
+                    <div class="activity-table">
+                        <h3>📋 Aktivitas Terbaru</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Aktivitas</th>
+                                    <th>Kredit</th>
+                                    <th>Channel</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>John Doe</strong></td>
+                                    <td>Pengembangan aplikasi</td>
+                                    <td>25.0</td>
+                                    <td><span class="badge whatsapp">📱 WhatsApp</span></td>
+                                    <td><span class="status pending">⏳ Pending</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Jane Smith</strong></td>
+                                    <td>Training/Workshop</td>
+                                    <td>15.0</td>
+                                    <td><span class="badge whatsapp">📱 WhatsApp</span></td>
+                                    <td><span class="status approved">✅ Approved</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Bob Johnson</strong></td>
+                                    <td>Dokumentasi teknis</td>
+                                    <td>7.5</td>
+                                    <td><span class="badge">🌐 Web</span></td>
+                                    <td><span class="status pending">⏳ Pending</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Alice Brown</strong></td>
+                                    <td>Analisis sistem</td>
+                                    <td>10.0</td>
+                                    <td><span class="badge">🌐 Web</span></td>
+                                    <td><span class="status approved">✅ Approved</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Charlie Davis</strong></td>
+                                    <td>Maintenance server</td>
+                                    <td>8.0</td>
+                                    <td><span class="badge whatsapp">📱 WhatsApp</span></td>
+                                    <td><span class="status rejected">❌ Rejected</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabName) {
+            // Hide all content
+            document.querySelectorAll('.content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // Remove active from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected content
+            document.getElementById(tabName).classList.add('active');
+
+            // Add active to clicked tab
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>

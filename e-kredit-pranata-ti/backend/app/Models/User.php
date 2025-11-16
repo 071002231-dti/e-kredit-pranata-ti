@@ -6,11 +6,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasApiTokens;
 
     /**
      * The attributes that are mass assignable.
@@ -18,9 +19,17 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
+        'nip',
         'name',
         'email',
         'password',
+        'role',
+        'position',
+        'unit_kerja',
+        'jenjang_jabatan',
+        'golongan',
+        'target_angka_kredit',
+        'angka_kredit_minimal',
     ];
 
     /**
@@ -44,5 +53,37 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Get activities submitted by this user
+     */
+    public function activities()
+    {
+        return $this->hasMany(Activity::class);
+    }
+
+    /**
+     * Get approvals made by this user (if verifier)
+     */
+    public function approvals()
+    {
+        return $this->hasMany(Approval::class, 'verifier_id');
+    }
+
+    /**
+     * Get SKP (Sasaran Kerja Pegawai) for this user
+     */
+    public function skps()
+    {
+        return $this->hasMany(Skp::class);
+    }
+
+    /**
+     * Get SKP that this user approved
+     */
+    public function approvedSkps()
+    {
+        return $this->hasMany(Skp::class, 'approved_by');
     }
 }
