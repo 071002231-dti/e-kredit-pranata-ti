@@ -12,7 +12,12 @@ import {
   XCircle,
   TrendingUp,
   Plus,
-  AlertCircle
+  AlertCircle,
+  Award,
+  Target,
+  Lightbulb,
+  Lock,
+  Unlock
 } from 'lucide-react'
 import { formatNumber } from '../lib/utils'
 
@@ -81,16 +86,12 @@ export function DashboardPage() {
     },
   ]
 
-  const complianceColor = stats?.compliance_status === 'compliant'
+  const complianceColor = stats?.compliance?.is_compliant
     ? 'text-green-600'
-    : stats?.compliance_status === 'warning'
-    ? 'text-yellow-600'
     : 'text-red-600'
 
-  const complianceBg = stats?.compliance_status === 'compliant'
+  const complianceBg = stats?.compliance?.is_compliant
     ? 'bg-green-50'
-    : stats?.compliance_status === 'warning'
-    ? 'bg-yellow-50'
     : 'bg-red-50'
 
   return (
@@ -129,37 +130,97 @@ export function DashboardPage() {
           ))}
         </div>
 
-        {/* Points & Compliance */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Total Points */}
+        {/* Current Position & Progress */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Current Position */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5" />
-                Total Angka Kredit
+                <Award className="h-5 w-5" />
+                Posisi Saat Ini
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold text-primary">
-                {formatNumber(stats?.total_points || 0)}
-              </div>
-              <div className="mt-4 space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Unsur Utama:</span>
-                  <span className="font-semibold">
-                    {formatNumber(stats?.unsur_utama_points || 0)} ({stats?.unsur_utama_percentage || 0}%)
-                  </span>
+              <div className="space-y-3">
+                <div>
+                  <div className="text-sm text-gray-600">Jenjang Jabatan</div>
+                  <div className="text-2xl font-bold text-primary">
+                    {stats?.current_jenjang || '-'}
+                  </div>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Unsur Penunjang:</span>
-                  <span className="font-semibold">
-                    {formatNumber(stats?.unsur_penunjang_points || 0)} ({stats?.unsur_penunjang_percentage || 0}%)
-                  </span>
+                <div>
+                  <div className="text-sm text-gray-600">Golongan</div>
+                  <div className="text-xl font-semibold">
+                    {stats?.current_golongan || '-'}
+                  </div>
                 </div>
               </div>
             </CardContent>
           </Card>
 
+          {/* Progress to Target */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Target className="h-5 w-5" />
+                Progress Target
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">Target:</span>
+                  <span className="font-semibold">{formatNumber(stats?.target_angka_kredit || 0)}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">Dicapai:</span>
+                  <span className="font-semibold">{formatNumber(stats?.total_points || 0)}</span>
+                </div>
+                <div>
+                  <div className="flex justify-between mb-1">
+                    <span className="text-sm">Progress</span>
+                    <span className="text-sm font-medium">{stats?.progress_percentage || 0}%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-3">
+                    <div
+                      className="bg-primary h-3 rounded-full transition-all"
+                      style={{ width: `${Math.min(stats?.progress_percentage || 0, 100)}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Credit Breakdown */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5" />
+                Rincian Kredit
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Total Kredit:</span>
+                  <span className="font-semibold">{formatNumber(stats?.total_points || 0)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Kredit Usable:</span>
+                  <span className="font-semibold text-green-600">{formatNumber(stats?.usable_credits || 0)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Kredit Banked:</span>
+                  <span className="font-semibold text-yellow-600">{formatNumber(stats?.total_banked_credits || 0)}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Points & Compliance */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Compliance Status */}
           <Card>
             <CardHeader>
@@ -171,9 +232,7 @@ export function DashboardPage() {
             <CardContent>
               <div className={`p-4 rounded-lg ${complianceBg}`}>
                 <div className={`text-lg font-semibold ${complianceColor} mb-2`}>
-                  {stats?.compliance_status === 'compliant' && '✓ Memenuhi Syarat'}
-                  {stats?.compliance_status === 'warning' && '⚠ Peringatan'}
-                  {stats?.compliance_status === 'non_compliant' && '✗ Tidak Memenuhi'}
+                  {stats?.compliance?.is_compliant ? '✓ Memenuhi Syarat' : '✗ Tidak Memenuhi'}
                 </div>
                 <p className="text-sm text-gray-700">
                   Aturan: Minimal 80% Unsur Utama, Maksimal 20% Unsur Penunjang
@@ -183,31 +242,144 @@ export function DashboardPage() {
                 <div className="text-sm">
                   <div className="flex justify-between mb-1">
                     <span>Unsur Utama</span>
-                    <span className="font-medium">{stats?.unsur_utama_percentage || 0}%</span>
+                    <span className="font-medium">{stats?.utama_percentage || 0}%</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div
                       className="bg-blue-600 h-2 rounded-full transition-all"
-                      style={{ width: `${stats?.unsur_utama_percentage || 0}%` }}
+                      style={{ width: `${stats?.utama_percentage || 0}%` }}
                     />
                   </div>
                 </div>
                 <div className="text-sm">
                   <div className="flex justify-between mb-1">
                     <span>Unsur Penunjang</span>
-                    <span className="font-medium">{stats?.unsur_penunjang_percentage || 0}%</span>
+                    <span className="font-medium">{stats?.penunjang_percentage || 0}%</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div
                       className="bg-green-600 h-2 rounded-full transition-all"
-                      style={{ width: `${stats?.unsur_penunjang_percentage || 0}%` }}
+                      style={{ width: `${stats?.penunjang_percentage || 0}%` }}
                     />
                   </div>
                 </div>
               </div>
             </CardContent>
           </Card>
+
+          {/* Banked Credits Overview */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Lock className="h-5 w-5" />
+                Kredit yang Di-Bank
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <Lock className="h-4 w-4 text-yellow-600" />
+                    <span className="text-sm">Masih Di-bank:</span>
+                  </div>
+                  <span className="font-semibold">{formatNumber(stats?.banked_credits?.total_banked || 0)}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <Unlock className="h-4 w-4 text-green-600" />
+                    <span className="text-sm">Sudah Unlock:</span>
+                  </div>
+                  <span className="font-semibold">{formatNumber(stats?.banked_credits?.total_unlocked || 0)}</span>
+                </div>
+                <div className="pt-2 border-t">
+                  <p className="text-xs text-gray-600">
+                    Kredit di-bank akan otomatis unlock saat promosi ke jenjang berikutnya
+                  </p>
+                </div>
+                <Link to="/credit-banks">
+                  <Button variant="outline" className="w-full">
+                    Lihat Detail Banking
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
         </div>
+
+        {/* Recommendations */}
+        {stats?.recommendations && stats.recommendations.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Lightbulb className="h-5 w-5" />
+                Rekomendasi
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {stats.recommendations.map((rec, idx) => (
+                  <div
+                    key={idx}
+                    className={`p-3 rounded-lg border ${
+                      rec.type === 'warning'
+                        ? 'bg-yellow-50 border-yellow-200'
+                        : rec.type === 'success'
+                        ? 'bg-green-50 border-green-200'
+                        : 'bg-blue-50 border-blue-200'
+                    }`}
+                  >
+                    <p className="text-sm font-medium">{rec.message}</p>
+                    {rec.action && (
+                      <p className="text-xs text-gray-600 mt-1">{rec.action}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Promotion Eligibility */}
+        {stats?.promotion && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Award className="h-5 w-5" />
+                Kelayakan Promosi
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {stats.promotion.can_promote ? (
+                <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                  <div className="flex items-center gap-2 text-green-700 font-semibold mb-2">
+                    <CheckCircle className="h-5 w-5" />
+                    Anda memenuhi syarat untuk promosi!
+                  </div>
+                  {stats.promotion.next_jenjang && (
+                    <div className="text-sm text-gray-700">
+                      <p>Jenjang Berikutnya: <strong>{stats.promotion.next_jenjang.jenjang}</strong></p>
+                      <p>Golongan: <strong>{stats.promotion.next_jenjang.golongan}</strong></p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <div className="text-sm text-gray-700">
+                    <p>Kredit yang dibutuhkan untuk promosi:</p>
+                    <p className="text-2xl font-bold text-primary mt-2">
+                      {formatNumber(stats.promotion.credits_needed)} angka kredit lagi
+                    </p>
+                    {stats.promotion.next_jenjang && (
+                      <p className="mt-2 text-gray-600">
+                        Target: {stats.promotion.next_jenjang.jenjang} ({stats.promotion.next_jenjang.golongan})
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Category Summary */}
         <Card>

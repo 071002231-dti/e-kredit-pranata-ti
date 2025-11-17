@@ -6,6 +6,7 @@ import { RegisterPage } from './pages/RegisterPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { ActivitiesPage } from './pages/ActivitiesPage'
 import { ActivityFormPage } from './pages/ActivityFormPage'
+import { CreditBankPage } from './pages/CreditBankPage'
 
 function App() {
   return (
@@ -38,6 +39,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <ActivityFormPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/credit-banks"
+            element={
+              <ProtectedRoute>
+                <CreditBankPage />
               </ProtectedRoute>
             }
           />

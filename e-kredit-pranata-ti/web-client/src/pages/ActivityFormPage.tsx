@@ -9,7 +9,7 @@ import { Label } from '../components/ui/Label'
 import { activityService } from '../services/activityService'
 import { creditSchemaService } from '../services/creditSchemaService'
 import type { CreditSchema } from '../types'
-import { ArrowLeft, Upload } from 'lucide-react'
+import { ArrowLeft, Upload, AlertTriangle, Info } from 'lucide-react'
 
 interface SchemaOption {
   value: number
@@ -138,7 +138,13 @@ export function ActivityFormPage() {
         formDataToSend.append('proof_file', file)
       }
 
-      await activityService.createActivity(formDataToSend)
+      const response = await activityService.createActivity(formDataToSend)
+
+      // Check if credits will be banked and show warning
+      if (response.banking_info?.will_be_banked) {
+        alert(`⚠️ Perhatian: ${response.banking_info.warning}`)
+      }
+
       navigate('/activities')
     } catch (err: any) {
       setError(err.response?.data?.message || 'Gagal menyimpan aktivitas')
@@ -243,37 +249,60 @@ export function ActivityFormPage() {
 
               {/* Schema Details */}
               {selectedSchema && (
-                <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <h4 className="font-semibold text-blue-900 mb-2">Detail Aktivitas</h4>
-                  <div className="grid grid-cols-2 gap-3 text-sm">
-                    <div>
-                      <span className="text-gray-600">Kategori:</span>{' '}
-                      <span className="font-medium">{selectedSchema.category}</span>
-                    </div>
-                    <div>
-                      <span className="text-gray-600">Sub Kategori:</span>{' '}
-                      <span className="font-medium">{selectedSchema.subcategory}</span>
-                    </div>
-                    <div>
-                      <span className="text-gray-600">Angka Kredit:</span>{' '}
-                      <span className="font-medium">{selectedSchema.credit_points} poin</span>
-                    </div>
-                    <div>
-                      <span className="text-gray-600">Jenis Unsur:</span>{' '}
-                      <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
-                        selectedSchema.unsur_type === 'utama'
-                          ? 'bg-blue-100 text-blue-700'
-                          : 'bg-green-100 text-green-700'
-                      }`}>
-                        {selectedSchema.unsur_type}
-                      </span>
-                    </div>
-                    <div className="col-span-2">
-                      <span className="text-gray-600">Bukti Fisik:</span>{' '}
-                      <span className="font-medium">{selectedSchema.bukti_fisik}</span>
+                <>
+                  <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <h4 className="font-semibold text-blue-900 mb-2">Detail Aktivitas</h4>
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div>
+                        <span className="text-gray-600">Kategori:</span>{' '}
+                        <span className="font-medium">{selectedSchema.category}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">Sub Kategori:</span>{' '}
+                        <span className="font-medium">{selectedSchema.subcategory}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">Angka Kredit:</span>{' '}
+                        <span className="font-medium">{selectedSchema.credit_points} poin</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">Jenis Unsur:</span>{' '}
+                        <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
+                          selectedSchema.unsur_type === 'utama'
+                            ? 'bg-blue-100 text-blue-700'
+                            : 'bg-green-100 text-green-700'
+                        }`}>
+                          {selectedSchema.unsur_type}
+                        </span>
+                      </div>
+                      <div className="col-span-2">
+                        <span className="text-gray-600">Bukti Fisik:</span>{' '}
+                        <span className="font-medium">{selectedSchema.bukti_fisik}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
+
+                  {/* Banking Warning */}
+                  <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                    <div className="flex items-start gap-3">
+                      <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+                      <div className="text-sm">
+                        <h5 className="font-semibold text-yellow-900 mb-1">Perhatian: Sistem Credit Banking</h5>
+                        <p className="text-yellow-800 mb-2">
+                          Kredit dari aktivitas ini mungkin akan di-<strong>bank</strong> (disimpan untuk jenjang berikutnya) jika:
+                        </p>
+                        <ul className="list-disc list-inside space-y-1 text-yellow-800 text-xs">
+                          <li>Melanggar aturan compliance (min 80% Unsur Utama, max 20% Penunjang)</li>
+                          <li>Melebihi batas maksimal kredit untuk jenjang Anda saat ini</li>
+                        </ul>
+                        <p className="text-yellow-700 text-xs mt-2 flex items-center gap-1">
+                          <Info className="h-3 w-3" />
+                          Kredit yang di-bank akan otomatis unlock saat promosi ke jenjang berikutnya
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </>
               )}
 
               {/* Title */}

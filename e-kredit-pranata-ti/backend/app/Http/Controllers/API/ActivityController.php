@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\Activity;
+use App\Models\CreditSchema;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -34,8 +35,10 @@ class ActivityController extends Controller
             'proof_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120', // 5MB
         ]);
 
+        $user = $request->user();
+
         $activity = new Activity([
-            'user_id' => $request->user()->id,
+            'user_id' => $user->id,
             'schema_id' => $validated['schema_id'],
             'title' => $validated['title'],
             'description' => $validated['description'],
@@ -50,9 +53,26 @@ class ActivityController extends Controller
 
         $activity->save();
 
+        // Load creditSchema to check if will be banked when approved
+        $activity->load('creditSchema');
+
+        // Check if this credit will be banked when approved
+        $bankingService = app(\App\Services\CreditBankingService::class);
+        $willBank = $bankingService->shouldBankCredits(
+            $user,
+            $activity
+        );
+
         return response()->json([
             'message' => 'Activity submitted successfully',
-            'activity' => $activity->load('creditSchema'),
+            'activity' => $activity,
+            'banking_info' => [
+                'will_be_banked' => $willBank['should_bank'],
+                'reason' => $willBank['reason'] ?? null,
+                'warning' => $willBank['should_bank']
+                    ? 'Kredit ini akan disimpan (banked) karena: ' . $willBank['reason']
+                    : null,
+            ],
         ], 201);
     }
 

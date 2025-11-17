@@ -84,11 +84,46 @@ export interface DashboardStats {
   approved: number
   rejected: number
   total_points: number
-  unsur_utama_points: number
-  unsur_penunjang_points: number
-  unsur_utama_percentage: number
-  unsur_penunjang_percentage: number
-  compliance_status: 'compliant' | 'warning' | 'non_compliant'
+  utama_points: number
+  penunjang_points: number
+  utama_percentage: number
+  penunjang_percentage: number
+  is_compliant: boolean
+  current_jenjang?: string
+  current_golongan?: string
+  target_angka_kredit?: number
+  angka_kredit_minimal?: number
+  progress_percentage: number
+  compliance: {
+    is_compliant: boolean
+    current_utama_percentage: number
+    current_penunjang_percentage: number
+    required_utama_min: number
+    required_penunjang_max: number
+  }
+  promotion: {
+    can_promote: boolean
+    next_jenjang: {
+      jenjang: string
+      golongan: string
+      min_credits: number
+      max_credits: number
+    } | null
+    credits_needed: number
+  }
+  recommendations: Array<{
+    type: 'warning' | 'info' | 'success'
+    message: string
+    action?: string
+  }>
+  banked_credits: {
+    total_banked: number
+    total_unlocked: number
+    count_banked: number
+    count_unlocked: number
+  }
+  usable_credits: number
+  total_banked_credits: number
 }
 
 export interface CategorySummary {
@@ -117,6 +152,36 @@ export interface PaginatedResponse<T> {
   prev_page_url: string | null
   to: number
   total: number
+}
+
+export interface CreditBank {
+  id: number
+  user_id: number
+  activity_id: number
+  credit_amount: number
+  reason: string
+  status: 'banked' | 'unlocked'
+  jenjang_when_banked: string
+  golongan_when_banked: string
+  unlocked_at?: string
+  unlock_reason?: string
+  created_at: string
+  updated_at: string
+  activity?: Activity
+  user?: User
+}
+
+export interface CreditBankSummary {
+  total_banked: number
+  total_unlocked: number
+  count_banked: number
+  count_unlocked: number
+  latest_banked?: CreditBank
+  reasons_breakdown: Array<{
+    reason: string
+    count: number
+    total_credits: number
+  }>
 }
 
 export interface ApiError {

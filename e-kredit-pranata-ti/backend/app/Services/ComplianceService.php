@@ -87,11 +87,12 @@ class ComplianceService
         $creditPenunjang = 0;
 
         foreach ($activities as $activity) {
-            if ($activity->schema) {
-                if ($activity->schema->unsur_type === 'utama') {
-                    $creditUtama += $activity->earned_points;
+            if ($activity->creditSchema) {
+                $points = $activity->creditSchema->credit_points;
+                if ($activity->creditSchema->unsur_type === 'utama') {
+                    $creditUtama += $points;
                 } else {
-                    $creditPenunjang += $activity->earned_points;
+                    $creditPenunjang += $points;
                 }
             }
         }

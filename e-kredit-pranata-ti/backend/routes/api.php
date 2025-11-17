@@ -7,6 +7,7 @@ use App\Http\Controllers\API\ActivityController;
 use App\Http\Controllers\API\ApprovalController;
 use App\Http\Controllers\API\DashboardController;
 use App\Http\Controllers\API\CreditSchemaController;
+use App\Http\Controllers\API\CreditBankController;
 use App\Http\Controllers\API\WhatsAppWebhookController;
 use App\Http\Controllers\API\FlowDataController;
 
@@ -46,6 +47,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
     Route::get('/dashboard/summary', [DashboardController::class, 'summary']);
     Route::post('/dashboard/validate-compliance', [DashboardController::class, 'validateCompliance']);
+
+    // Credit Bank routes
+    Route::prefix('credit-banks')->group(function () {
+        Route::get('/', [CreditBankController::class, 'index']); // List banked credits
+        Route::get('/summary', [CreditBankController::class, 'summary']); // Get summary
+        Route::get('/stats', [CreditBankController::class, 'stats']); // Get statistics
+        Route::get('/{id}', [CreditBankController::class, 'show']); // Show detail
+        Route::post('/{id}/unlock', [CreditBankController::class, 'unlock']); // Manual unlock (admin only)
+    });
 
     // Approval routes (for verifier and admin only)
     Route::prefix('approvals')->group(function () {

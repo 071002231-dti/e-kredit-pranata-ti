@@ -11,12 +11,16 @@ use Illuminate\Support\Facades\DB;
 class DashboardController extends Controller
 {
     /**
-     * Get user statistics
+     * Get user statistics with compliance and banking info
      */
     public function stats(Request $request)
     {
-        $userId = $request->user()->id;
         $user = $request->user();
+        $userId = $user->id;
+
+        // Use the services from Phase 2A
+        $complianceService = app(\App\Services\ComplianceService::class);
+        $bankingService = app(\App\Services\CreditBankingService::class);
 
         // Calculate total points and unsur distribution
         $totalPoints = Activity::where('user_id', $userId)
@@ -43,22 +47,64 @@ class DashboardController extends Controller
         // Check compliance with Pasal 3 (Utama ≥ 80%, Penunjang ≤ 20%)
         $isCompliant = $utamaPercentage >= 80 && $penunjangPercentage <= 20;
 
+        // Get compliance data from ComplianceService
+        $complianceData = $complianceService->calculateUserCompliance($user);
+        $canPromote = $complianceService->canPromote($user);
+        $nextJenjang = $complianceService->getNextJenjang($user);
+        $recommendations = $complianceService->getRecommendations($user);
+
+        // Get banked credits summary
+        $bankedSummary = $bankingService->getBankedCreditsSummary($user);
+
         $stats = [
+            // Basic stats
             'total_activities' => Activity::where('user_id', $userId)->count(),
             'pending' => Activity::where('user_id', $userId)->where('status', 'pending')->count(),
             'approved' => Activity::where('user_id', $userId)->where('status', 'approved')->count(),
             'rejected' => Activity::where('user_id', $userId)->where('status', 'rejected')->count(),
+
+            // Credit points
             'total_points' => $totalPoints,
             'utama_points' => $utamaPoints,
             'penunjang_points' => $penunjangPoints,
             'utama_percentage' => round($utamaPercentage, 2),
             'penunjang_percentage' => round($penunjangPercentage, 2),
             'is_compliant' => $isCompliant,
+
+            // User position and targets
+            'current_jenjang' => $user->jenjang_jabatan,
+            'current_golongan' => $user->golongan,
             'target_angka_kredit' => $user->target_angka_kredit,
             'angka_kredit_minimal' => $user->angka_kredit_minimal,
             'progress_percentage' => $user->target_angka_kredit > 0
                 ? round(($totalPoints / $user->target_angka_kredit) * 100, 2)
                 : 0,
+
+            // Compliance details from Phase 2A
+            'compliance' => [
+                'is_compliant' => $complianceData['is_compliant'],
+                'current_utama_percentage' => $complianceData['utama_percentage'],
+                'current_penunjang_percentage' => $complianceData['penunjang_percentage'],
+                'required_utama_min' => 80,
+                'required_penunjang_max' => 20,
+            ],
+
+            // Promotion eligibility
+            'promotion' => [
+                'can_promote' => $canPromote,
+                'next_jenjang' => $nextJenjang,
+                'credits_needed' => $nextJenjang ? ($nextJenjang['min_credits'] - $totalPoints) : 0,
+            ],
+
+            // Recommendations
+            'recommendations' => $recommendations,
+
+            // Banked credits summary
+            'banked_credits' => $bankedSummary,
+
+            // User credit tracking fields
+            'usable_credits' => $user->current_credit_total ?? 0,
+            'total_banked_credits' => $user->banked_credit_total ?? 0,
         ];
 
         return response()->json($stats);

@@ -34,7 +34,12 @@ class CreditBankingService
      */
     public function shouldBankCredits(User $user, Activity $activity): array
     {
-        if (!$activity->schema) {
+        // Load creditSchema if not loaded
+        if (!$activity->relationLoaded('creditSchema')) {
+            $activity->load('creditSchema');
+        }
+
+        if (!$activity->creditSchema) {
             return [
                 'should_bank' => false,
                 'reason' => 'No credit schema attached',
@@ -46,8 +51,9 @@ class CreditBankingService
         $currentPenunjang = $user->current_credit_penunjang ?? 0;
 
         // Add this activity's credits
-        $newUtama = $currentUtama + ($activity->schema->unsur_type === 'utama' ? $activity->earned_points : 0);
-        $newPenunjang = $currentPenunjang + ($activity->schema->unsur_type === 'penunjang' ? $activity->earned_points : 0);
+        $creditPoints = $activity->creditSchema->credit_points;
+        $newUtama = $currentUtama + ($activity->creditSchema->unsur_type === 'utama' ? $creditPoints : 0);
+        $newPenunjang = $currentPenunjang + ($activity->creditSchema->unsur_type === 'penunjang' ? $creditPoints : 0);
 
         // Check if this would break compliance
         $compliance = $this->complianceService->validateCompliance($newUtama, $newPenunjang);
@@ -57,8 +63,8 @@ class CreditBankingService
                 'should_bank' => true,
                 'reason' => sprintf(
                     'Menambahkan kredit ini akan melanggar aturan 80/20. Unsur %s akan menjadi %.1f%%',
-                    $activity->schema->unsur_type === 'utama' ? 'Utama' : 'Penunjang',
-                    $activity->schema->unsur_type === 'utama' ? $compliance['percentage_utama'] : $compliance['percentage_penunjang']
+                    $activity->creditSchema->unsur_type === 'utama' ? 'Utama' : 'Penunjang',
+                    $activity->creditSchema->unsur_type === 'utama' ? $compliance['percentage_utama'] : $compliance['percentage_penunjang']
                 ),
                 'compliance' => $compliance,
             ];
@@ -110,13 +116,20 @@ class CreditBankingService
             }
         }
 
+        // Load creditSchema if not loaded
+        if (!$activity->relationLoaded('creditSchema')) {
+            $activity->load('creditSchema');
+        }
+
+        $creditPoints = $activity->creditSchema->credit_points;
+
         $creditBank = CreditBank::create([
             'user_id' => $user->id,
             'activity_id' => $activity->id,
-            'credit_schema_id' => $activity->credit_schema_id,
-            'credit_points' => $activity->earned_points,
-            'unsur_type' => $activity->schema->unsur_type ?? 'utama',
-            'activity_category' => $activity->schema->category ?? 'Unknown',
+            'credit_schema_id' => $activity->schema_id,
+            'credit_points' => $creditPoints,
+            'unsur_type' => $activity->creditSchema->unsur_type,
+            'activity_category' => $activity->creditSchema->category,
             'status' => 'banked',
             'required_jenjang' => $requiredJenjang ?? 'PK Pelaksana',
             'required_golongan' => $requiredGolongan,
@@ -130,7 +143,7 @@ class CreditBankingService
 
         Log::info("Credits banked for user {$user->id}", [
             'credit_bank_id' => $creditBank->id,
-            'points' => $activity->earned_points,
+            'points' => $creditPoints,
             'reason' => $reason,
         ]);
 
@@ -203,7 +216,7 @@ class CreditBankingService
         // Get all approved activities that are NOT banked
         $activities = Activity::where('user_id', $user->id)
             ->where('status', 'approved')
-            ->with('schema')
+            ->with('creditSchema')
             ->get();
 
         // Get IDs of activities that are banked
@@ -224,11 +237,12 @@ class CreditBankingService
                 }
             }
 
-            if ($activity->schema) {
-                if ($activity->schema->unsur_type === 'utama') {
-                    $creditUtama += $activity->earned_points;
+            if ($activity->creditSchema) {
+                $points = $activity->creditSchema->credit_points;
+                if ($activity->creditSchema->unsur_type === 'utama') {
+                    $creditUtama += $points;
                 } else {
-                    $creditPenunjang += $activity->earned_points;
+                    $creditPenunjang += $points;
                 }
             }
         }

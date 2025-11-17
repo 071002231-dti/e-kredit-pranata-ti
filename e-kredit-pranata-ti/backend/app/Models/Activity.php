@@ -40,6 +40,14 @@ class Activity extends Model
     }
 
     /**
+     * Alias for creditSchema (for backward compatibility)
+     */
+    public function schema()
+    {
+        return $this->creditSchema();
+    }
+
+    /**
      * Get approvals for this activity
      */
     public function approvals()
@@ -53,5 +61,56 @@ class Activity extends Model
     public function latestApproval()
     {
         return $this->hasOne(Approval::class)->latestOfMany();
+    }
+
+    /**
+     * Boot the model and add event listeners for credit banking
+     */
+    protected static function booted()
+    {
+        static::updated(function ($activity) {
+            // Check if status changed to 'approved' or 'rejected'
+            if ($activity->wasChanged('status')) {
+                $bankingService = app(\App\Services\CreditBankingService::class);
+
+                if ($activity->status === 'approved') {
+                    // Load the credit schema and user
+                    $activity->load('creditSchema', 'user');
+
+                    if (!$activity->creditSchema) {
+                        \Log::warning("Activity {$activity->id} approved but has no credit schema");
+                        return;
+                    }
+
+                    // Check if credits should be banked
+                    $shouldBank = $bankingService->shouldBankCredits(
+                        $activity->user,
+                        $activity
+                    );
+
+                    if ($shouldBank['should_bank']) {
+                        // Bank the credits
+                        $bankingService->bankCredits(
+                            $activity->user,
+                            $activity,
+                            $shouldBank['reason']
+                        );
+
+                        \Log::info("Credits banked for activity {$activity->id}: {$activity->creditSchema->credit_points} points. Reason: {$shouldBank['reason']}");
+                    } else {
+                        // Credits approved and usable directly
+                        \Log::info("Credits approved for activity {$activity->id}: {$activity->creditSchema->credit_points} points (usable)");
+                    }
+
+                    // Update user's current credits (both usable and banked)
+                    $bankingService->updateUserCurrentCredits($activity->user);
+                }
+
+                // Recalculate user credits on any status change
+                if ($activity->status === 'rejected') {
+                    $bankingService->updateUserCurrentCredits($activity->user);
+                }
+            }
+        });
     }
 }
