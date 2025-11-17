@@ -1,4 +1,4 @@
-import api from '../config/api'
+import api from '../lib/api'
 import type { CreditBank, CreditBankSummary, PaginatedResponse } from '../types'
 
 export const creditBankService = {
