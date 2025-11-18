@@ -168,7 +168,7 @@ class ComplianceService
         }
 
         // Check if has enough credits for current position
-        $hasEnoughCredits = $compliance['total_credit'] >= $currentTarget['min_credit'];
+        $hasEnoughCredits = ($compliance['total_credit'] ?? 0) >= $currentTarget['min_credit'];
 
         // Check 80/20 compliance
         $isCompliant = $compliance['is_compliant'];
