@@ -21,13 +21,13 @@ export const activityService = {
     return data.data
   },
 
-  async createActivity(formData: FormData): Promise<Activity> {
-    const { data } = await api.post<{ data: Activity }>('/activities', formData, {
+  async createActivity(formData: FormData): Promise<any> {
+    const { data } = await api.post('/activities', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
     })
-    return data.data
+    return data  // Return whole response (includes activity, banking_info, message)
   },
 
   async updateActivity(id: number, formData: FormData): Promise<Activity> {
