@@ -36,6 +36,33 @@ class ActivityController extends Controller
         ]);
 
         $user = $request->user();
+        $schema = CreditSchema::findOrFail($validated['schema_id']);
+
+        // Validation 1: Check if user is eligible based on jenjang jabatan
+        if (!$schema->canBePerformedBy($user->jenjang_jabatan)) {
+            return response()->json([
+                'message' => 'Anda tidak memiliki jenjang jabatan yang sesuai untuk aktivitas ini',
+                'error' => "Aktivitas ini memerlukan jenjang: {$schema->pelaksana}, tetapi Anda adalah: {$user->jenjang_jabatan}",
+            ], 403);
+        }
+
+        // Validation 2: Check batasan penilaian (e.g., "25 program/tahun")
+        $batasanNumeric = $schema->getBatasanNumericAttribute();
+        if ($batasanNumeric && str_contains($schema->batasan_penilaian, '/tahun')) {
+            // Count how many times this schema was submitted this year (approved only)
+            $countThisYear = Activity::where('user_id', $user->id)
+                ->where('schema_id', $schema->id)
+                ->where('status', 'approved')
+                ->whereYear('submitted_at', date('Y'))
+                ->count();
+
+            if ($countThisYear >= $batasanNumeric) {
+                return response()->json([
+                    'message' => 'Batasan penilaian tahunan telah tercapai',
+                    'error' => "Anda sudah mencapai batas {$schema->batasan_penilaian} untuk aktivitas ini. Saat ini: {$countThisYear}/{$batasanNumeric}",
+                ], 422);
+            }
+        }
 
         $activity = new Activity([
             'user_id' => $user->id,

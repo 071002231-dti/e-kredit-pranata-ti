@@ -8,6 +8,7 @@ use App\Http\Controllers\API\ApprovalController;
 use App\Http\Controllers\API\DashboardController;
 use App\Http\Controllers\API\CreditSchemaController;
 use App\Http\Controllers\API\CreditBankController;
+use App\Http\Controllers\API\SkpController;
 use App\Http\Controllers\API\WhatsAppWebhookController;
 use App\Http\Controllers\API\FlowDataController;
 
@@ -55,6 +56,22 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/stats', [CreditBankController::class, 'stats']); // Get statistics
         Route::get('/{id}', [CreditBankController::class, 'show']); // Show detail
         Route::post('/{id}/unlock', [CreditBankController::class, 'unlock']); // Manual unlock (admin only)
+    });
+
+    // SKP (Sasaran Kerja Pegawai) routes
+    Route::prefix('skp')->group(function () {
+        Route::get('/', [SkpController::class, 'index']); // List user's SKPs
+        Route::post('/', [SkpController::class, 'store']); // Create new SKP
+        Route::get('/stats', [SkpController::class, 'stats']); // Get SKP stats by year
+        Route::get('/{id}', [SkpController::class, 'show']); // Show SKP detail
+        Route::put('/{id}', [SkpController::class, 'update']); // Update SKP
+        Route::delete('/{id}', [SkpController::class, 'destroy']); // Delete SKP
+        Route::post('/{id}/submit', [SkpController::class, 'submit']); // Submit for approval
+
+        // SKP Items management
+        Route::post('/{id}/items', [SkpController::class, 'addItem']); // Add item
+        Route::put('/{skpId}/items/{itemId}', [SkpController::class, 'updateItem']); // Update item
+        Route::delete('/{skpId}/items/{itemId}', [SkpController::class, 'removeItem']); // Remove item
     });
 
     // Approval routes (for verifier and admin only)

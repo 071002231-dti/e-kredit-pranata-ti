@@ -226,44 +226,105 @@ export function DashboardPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <AlertCircle className="h-5 w-5" />
-                Status Compliance
+                Status Compliance (PR No. 3/2025)
               </CardTitle>
+              <CardDescription>
+                Aturan: Min 80% Unsur Utama, Max 20% Penunjang
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className={`p-4 rounded-lg ${complianceBg}`}>
-                <div className={`text-lg font-semibold ${complianceColor} mb-2`}>
-                  {stats?.compliance?.is_compliant ? '✓ Memenuhi Syarat' : '✗ Tidak Memenuhi'}
+              <div className={`p-4 rounded-lg ${complianceBg} border ${
+                stats?.compliance?.is_compliant ? 'border-green-300' : 'border-red-300'
+              }`}>
+                <div className={`text-lg font-semibold ${complianceColor} mb-2 flex items-center gap-2`}>
+                  {stats?.compliance?.is_compliant ? (
+                    <>
+                      <CheckCircle className="h-5 w-5" />
+                      ✓ Memenuhi Syarat Compliance
+                    </>
+                  ) : (
+                    <>
+                      <XCircle className="h-5 w-5" />
+                      ✗ Tidak Memenuhi Compliance
+                    </>
+                  )}
                 </div>
-                <p className="text-sm text-gray-700">
-                  Aturan: Minimal 80% Unsur Utama, Maksimal 20% Unsur Penunjang
+                <p className="text-xs text-gray-600">
+                  Sesuai Peraturan Rektor UII No. 3 Tahun 2025 tentang Jabatan Fungsional Pranata TI
                 </p>
               </div>
-              <div className="mt-4 space-y-2">
+
+              <div className="mt-4 space-y-4">
+                {/* Unsur Utama */}
                 <div className="text-sm">
                   <div className="flex justify-between mb-1">
-                    <span>Unsur Utama</span>
-                    <span className="font-medium">{stats?.utama_percentage || 0}%</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">Unsur Utama</span>
+                      {(stats?.utama_percentage || 0) < 80 && (
+                        <AlertCircle className="h-4 w-4 text-red-500" />
+                      )}
+                    </div>
+                    <span className={`font-bold ${
+                      (stats?.utama_percentage || 0) >= 80 ? 'text-green-600' : 'text-red-600'
+                    }`}>
+                      {stats?.utama_percentage || 0}% / min 80%
+                    </span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="w-full bg-gray-200 rounded-full h-3 relative overflow-hidden">
                     <div
-                      className="bg-blue-600 h-2 rounded-full transition-all"
-                      style={{ width: `${stats?.utama_percentage || 0}%` }}
+                      className={`h-3 rounded-full transition-all ${
+                        (stats?.utama_percentage || 0) >= 80 ? 'bg-green-600' : 'bg-red-600'
+                      }`}
+                      style={{ width: `${Math.min(stats?.utama_percentage || 0, 100)}%` }}
                     />
+                    {/* Target line at 80% */}
+                    <div className="absolute top-0 bottom-0 w-0.5 bg-blue-800 opacity-50" style={{ left: '80%' }} />
+                  </div>
+                  <div className="text-xs text-gray-600 mt-1">
+                    {formatNumber(stats?.utama_points || 0)} poin dari {formatNumber(stats?.total_points || 0)} total
                   </div>
                 </div>
+
+                {/* Unsur Penunjang */}
                 <div className="text-sm">
                   <div className="flex justify-between mb-1">
-                    <span>Unsur Penunjang</span>
-                    <span className="font-medium">{stats?.penunjang_percentage || 0}%</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">Unsur Penunjang</span>
+                      {(stats?.penunjang_percentage || 0) > 20 && (
+                        <AlertCircle className="h-4 w-4 text-red-500" />
+                      )}
+                    </div>
+                    <span className={`font-bold ${
+                      (stats?.penunjang_percentage || 0) <= 20 ? 'text-green-600' : 'text-red-600'
+                    }`}>
+                      {stats?.penunjang_percentage || 0}% / max 20%
+                    </span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="w-full bg-gray-200 rounded-full h-3 relative overflow-hidden">
                     <div
-                      className="bg-green-600 h-2 rounded-full transition-all"
-                      style={{ width: `${stats?.penunjang_percentage || 0}%` }}
+                      className={`h-3 rounded-full transition-all ${
+                        (stats?.penunjang_percentage || 0) <= 20 ? 'bg-green-600' : 'bg-red-600'
+                      }`}
+                      style={{ width: `${Math.min(stats?.penunjang_percentage || 0, 100)}%` }}
                     />
+                    {/* Target line at 20% */}
+                    <div className="absolute top-0 bottom-0 w-0.5 bg-blue-800 opacity-50" style={{ left: '20%' }} />
+                  </div>
+                  <div className="text-xs text-gray-600 mt-1">
+                    {formatNumber(stats?.penunjang_points || 0)} poin dari {formatNumber(stats?.total_points || 0)} total
                   </div>
                 </div>
               </div>
+
+              {/* Compliance Warning */}
+              {!stats?.compliance?.is_compliant && (
+                <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-sm text-red-800 font-medium">⚠️ Peringatan Compliance</p>
+                  <p className="text-xs text-red-700 mt-1">
+                    Aktivitas Anda tidak memenuhi persyaratan. Pastikan minimal 80% dari kredit berasal dari Unsur Utama dan maksimal 20% dari Unsur Penunjang.
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
 

@@ -7,6 +7,8 @@ import { DashboardPage } from './pages/DashboardPage'
 import { ActivitiesPage } from './pages/ActivitiesPage'
 import { ActivityFormPage } from './pages/ActivityFormPage'
 import { CreditBankPage } from './pages/CreditBankPage'
+import { SkpListPage } from './pages/SkpListPage'
+import { SkpFormPage } from './pages/SkpFormPage'
 
 function App() {
   return (
@@ -47,6 +49,30 @@ function App() {
             element={
               <ProtectedRoute>
                 <CreditBankPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/skp"
+            element={
+              <ProtectedRoute>
+                <SkpListPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/skp/new"
+            element={
+              <ProtectedRoute>
+                <SkpFormPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/skp/:id"
+            element={
+              <ProtectedRoute>
+                <SkpFormPage />
               </ProtectedRoute>
             }
           />

@@ -251,7 +251,10 @@ export function ActivityFormPage() {
               {selectedSchema && (
                 <>
                   <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                    <h4 className="font-semibold text-blue-900 mb-2">Detail Aktivitas</h4>
+                    <h4 className="font-semibold text-blue-900 mb-3 flex items-center gap-2">
+                      <Info className="h-5 w-5" />
+                      Detail Aktivitas & Persyaratan
+                    </h4>
                     <div className="grid grid-cols-2 gap-3 text-sm">
                       <div>
                         <span className="text-gray-600">Kategori:</span>{' '}
@@ -263,7 +266,11 @@ export function ActivityFormPage() {
                       </div>
                       <div>
                         <span className="text-gray-600">Angka Kredit:</span>{' '}
-                        <span className="font-medium">{selectedSchema.credit_points} poin</span>
+                        <span className="font-medium text-blue-700">{selectedSchema.credit_points} poin</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">Satuan Hasil:</span>{' '}
+                        <span className="font-medium">{selectedSchema.satuan_hasil || '-'}</span>
                       </div>
                       <div>
                         <span className="text-gray-600">Jenis Unsur:</span>{' '}
@@ -272,13 +279,38 @@ export function ActivityFormPage() {
                             ? 'bg-blue-100 text-blue-700'
                             : 'bg-green-100 text-green-700'
                         }`}>
-                          {selectedSchema.unsur_type}
+                          {selectedSchema.unsur_type?.toUpperCase()}
                         </span>
                       </div>
-                      <div className="col-span-2">
-                        <span className="text-gray-600">Bukti Fisik:</span>{' '}
-                        <span className="font-medium">{selectedSchema.bukti_fisik}</span>
+                      <div>
+                        <span className="text-gray-600">Jenjang Pelaksana:</span>{' '}
+                        <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
+                          selectedSchema.pelaksana === 'Semua Jenjang'
+                            ? 'bg-gray-100 text-gray-700'
+                            : 'bg-purple-100 text-purple-700'
+                        }`}>
+                          {selectedSchema.pelaksana || 'Semua Jenjang'}
+                        </span>
                       </div>
+                      {selectedSchema.batasan_penilaian && selectedSchema.batasan_penilaian !== 'tidak terbatas' && (
+                        <div className="col-span-2 bg-yellow-100 border border-yellow-300 rounded px-3 py-2">
+                          <span className="text-gray-700 font-semibold">⚠️ Batasan Penilaian:</span>{' '}
+                          <span className="font-medium text-yellow-800">{selectedSchema.batasan_penilaian}</span>
+                          <p className="text-xs text-yellow-700 mt-1">
+                            Pastikan Anda tidak melebihi batas ini dalam periode yang ditentukan
+                          </p>
+                        </div>
+                      )}
+                      <div className="col-span-2">
+                        <span className="text-gray-600">Bukti Fisik yang Dibutuhkan:</span>{' '}
+                        <span className="font-medium">{selectedSchema.bukti_fisik || 'Dokumentasi bukti pelaksanaan'}</span>
+                      </div>
+                      {selectedSchema.description && (
+                        <div className="col-span-2">
+                          <span className="text-gray-600">Deskripsi:</span>{' '}
+                          <p className="text-gray-700 mt-1">{selectedSchema.description}</p>
+                        </div>
+                      )}
                     </div>
                   </div>
 
