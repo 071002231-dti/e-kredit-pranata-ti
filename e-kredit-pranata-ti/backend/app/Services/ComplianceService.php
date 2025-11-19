@@ -177,13 +177,13 @@ class ComplianceService
 
         return [
             'can_promote' => $canPromote,
-            'current_credit' => $compliance['total_credit'],
+            'current_credit' => $compliance['total_credit'] ?? 0,
             'required_credit' => $currentTarget['min_credit'],
             'next_jenjang' => $nextJenjang,
             'is_compliant' => $isCompliant,
             'compliance' => $compliance,
             'reason' => !$hasEnoughCredits
-                ? sprintf('Perlu %.2f kredit lagi', $currentTarget['min_credit'] - $compliance['total_credit'])
+                ? sprintf('Perlu %.2f kredit lagi', $currentTarget['min_credit'] - ($compliance['total_credit'] ?? 0))
                 : (!$isCompliant ? 'Tidak memenuhi aturan 80/20' : 'Bisa naik jabatan'),
         ];
     }

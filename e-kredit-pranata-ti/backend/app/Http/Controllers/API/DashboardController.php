@@ -15,7 +15,8 @@ class DashboardController extends Controller
      */
     public function stats(Request $request)
     {
-        $user = $request->user();
+        // Get fresh user data from database to ensure all fields are loaded
+        $user = $request->user()->fresh();
         $userId = $user->id;
 
         // Use the services from Phase 2A
