@@ -68,6 +68,20 @@ class ComprehensiveUserSeeder extends Seeder
                 'angka_kredit_minimal' => 48.00,
             ],
 
+            [
+                'nip' => '199203151992031016',
+                'name' => 'Eko Prasetyo',
+                'email' => 'eko.pelaksana@uii.ac.id',
+                'password' => $password,
+                'role' => 'user',
+                'position' => 'Pranata TI Pelaksana',
+                'unit_kerja' => 'Fakultas Psikologi dan Ilmu Sosial Budaya',
+                'jenjang_jabatan' => 'Pranata TI Pelaksana',
+                'golongan' => 'II/d',
+                'target_angka_kredit' => 80.00,
+                'angka_kredit_minimal' => 64.00,
+            ],
+
             // ==========================================
             // JALUR TERAMPIL - PELAKSANA LANJUTAN
             // ==========================================
@@ -83,6 +97,19 @@ class ComprehensiveUserSeeder extends Seeder
                 'golongan' => 'III/a',
                 'target_angka_kredit' => 100.00,
                 'angka_kredit_minimal' => 80.00,
+            ],
+            [
+                'nip' => '198905151989051017',
+                'name' => 'Fitri Handayani',
+                'email' => 'fitri.pelaksana.lanjutan@uii.ac.id',
+                'password' => $password,
+                'role' => 'user',
+                'position' => 'Pranata TI Pelaksana Lanjutan',
+                'unit_kerja' => 'Fakultas Ilmu Agama Islam',
+                'jenjang_jabatan' => 'Pranata TI Pelaksana Lanjutan',
+                'golongan' => 'III/b',
+                'target_angka_kredit' => 150.00,
+                'angka_kredit_minimal' => 120.00,
             ],
             [
                 'nip' => '198208101982081005',
@@ -101,6 +128,19 @@ class ComprehensiveUserSeeder extends Seeder
             // ==========================================
             // JALUR TERAMPIL - PENYELIA
             // ==========================================
+            [
+                'nip' => '198401101984011018',
+                'name' => 'Gunawan Susanto',
+                'email' => 'gunawan.penyelia@uii.ac.id',
+                'password' => $password,
+                'role' => 'verifier',
+                'position' => 'Pranata TI Penyelia',
+                'unit_kerja' => 'Direktorat Sistem Informasi',
+                'jenjang_jabatan' => 'Pranata TI Penyelia',
+                'golongan' => 'III/d',
+                'target_angka_kredit' => 300.00,
+                'angka_kredit_minimal' => 240.00,
+            ],
             [
                 'nip' => '197805201978051006',
                 'name' => 'Ir. Bambang Wijaya',
@@ -145,28 +185,80 @@ class ComprehensiveUserSeeder extends Seeder
                 'angka_kredit_minimal' => 80.00,
             ],
             [
+                'nip' => '199105201991051019',
+                'name' => 'Rika Widiastuti, S.Kom',
+                'email' => 'rika.pertama@uii.ac.id',
+                'password' => $password,
+                'role' => 'user',
+                'position' => 'Pranata TI Pertama',
+                'unit_kerja' => 'Fakultas Kedokteran',
+                'jenjang_jabatan' => 'Pranata TI Pertama',
+                'golongan' => 'III/b',
+                'target_angka_kredit' => 150.00,
+                'angka_kredit_minimal' => 120.00,
+            ],
+            [
                 'nip' => '199010201990101009',
                 'name' => 'Lina Marlina, S.T',
                 'email' => 'lina.pertama@uii.ac.id',
                 'password' => $password,
                 'role' => 'user',
                 'position' => 'Pranata TI Pertama',
-                'unit_kerja' => 'Fakultas Kedokteran',
+                'unit_kerja' => 'Fakultas Hukum',
                 'jenjang_jabatan' => 'Pranata TI Pertama',
                 'golongan' => 'III/c',
                 'target_angka_kredit' => 200.00,
                 'angka_kredit_minimal' => 160.00,
+            ],
+            [
+                'nip' => '198908151989081020',
+                'name' => 'Joko Widodo, S.T',
+                'email' => 'joko.pertama@uii.ac.id',
+                'password' => $password,
+                'role' => 'user',
+                'position' => 'Pranata TI Pertama',
+                'unit_kerja' => 'Fakultas Ekonomi',
+                'jenjang_jabatan' => 'Pranata TI Pertama',
+                'golongan' => 'III/d',
+                'target_angka_kredit' => 300.00,
+                'angka_kredit_minimal' => 240.00,
             ],
 
             // ==========================================
             // JALUR AHLI - PTI MUDA
             // ==========================================
             [
+                'nip' => '198912201989121021',
+                'name' => 'Dian Pratiwi, S.Kom., M.T',
+                'email' => 'dian.muda@uii.ac.id',
+                'password' => $password,
+                'role' => 'user',
+                'position' => 'Pranata TI Muda',
+                'unit_kerja' => 'Fakultas Psikologi dan Ilmu Sosial Budaya',
+                'jenjang_jabatan' => 'Pranata TI Muda',
+                'golongan' => 'III/b',
+                'target_angka_kredit' => 150.00,
+                'angka_kredit_minimal' => 120.00,
+            ],
+            [
+                'nip' => '198808151988081022',
+                'name' => 'Budi Hartono, M.Kom',
+                'email' => 'budi.muda@uii.ac.id',
+                'password' => $password,
+                'role' => 'user',
+                'position' => 'Pranata TI Muda',
+                'unit_kerja' => 'Fakultas Teknik Sipil dan Perencanaan',
+                'jenjang_jabatan' => 'Pranata TI Muda',
+                'golongan' => 'III/c',
+                'target_angka_kredit' => 200.00,
+                'angka_kredit_minimal' => 160.00,
+            ],
+            [
                 'nip' => '198707101987071010',
                 'name' => 'Dr. Hendra Gunawan, M.Kom',
                 'email' => 'hendra.muda@uii.ac.id',
                 'password' => $password,
-                'role' => 'user',
+                'role' => 'verifier',
                 'position' => 'Pranata TI Muda',
                 'unit_kerja' => 'Fakultas Teknologi Industri',
                 'jenjang_jabatan' => 'Pranata TI Muda',
@@ -192,11 +284,37 @@ class ComprehensiveUserSeeder extends Seeder
             // JALUR AHLI - PTI MADYA
             // ==========================================
             [
+                'nip' => '198506101985061023',
+                'name' => 'Dr. Hendro Wicaksono, S.Kom., M.T',
+                'email' => 'hendro.madya@uii.ac.id',
+                'password' => $password,
+                'role' => 'verifier',
+                'position' => 'Pranata TI Madya',
+                'unit_kerja' => 'Direktorat Sistem Informasi',
+                'jenjang_jabatan' => 'Pranata TI Madya',
+                'golongan' => 'IV/a',
+                'target_angka_kredit' => 400.00,
+                'angka_kredit_minimal' => 320.00,
+            ],
+            [
+                'nip' => '198403201984032024',
+                'name' => 'Dr. Indah Permatasari, M.Kom',
+                'email' => 'indah.madya@uii.ac.id',
+                'password' => $password,
+                'role' => 'verifier',
+                'position' => 'Pranata TI Madya',
+                'unit_kerja' => 'Direktorat Sistem Informasi',
+                'jenjang_jabatan' => 'Pranata TI Madya',
+                'golongan' => 'IV/b',
+                'target_angka_kredit' => 550.00,
+                'angka_kredit_minimal' => 440.00,
+            ],
+            [
                 'nip' => '198203151982031012',
                 'name' => 'Prof. Dr. Ir. Agus Setiawan, M.Sc',
                 'email' => 'agus.madya@uii.ac.id',
                 'password' => $password,
-                'role' => 'verifier',
+                'role' => 'admin',
                 'position' => 'Pranata TI Madya',
                 'unit_kerja' => 'Direktorat Sistem Informasi',
                 'jenjang_jabatan' => 'Pranata TI Madya',
@@ -221,6 +339,19 @@ class ComprehensiveUserSeeder extends Seeder
             // ==========================================
             // JALUR AHLI - PTI UTAMA
             // ==========================================
+            [
+                'nip' => '198102151981021025',
+                'name' => 'Prof. Dr. Ir. Ari Wibowo, M.Sc',
+                'email' => 'ari.utama@uii.ac.id',
+                'password' => $password,
+                'role' => 'admin',
+                'position' => 'Pranata TI Utama',
+                'unit_kerja' => 'Rektorat - Wakil Rektor Bidang Keuangan dan SDM',
+                'jenjang_jabatan' => 'Pranata TI Utama',
+                'golongan' => 'IV/d',
+                'target_angka_kredit' => 850.00,
+                'angka_kredit_minimal' => 680.00,
+            ],
             [
                 'nip' => '197708201977081014',
                 'name' => 'Prof. Dr. Ir. Sudirman Yahya, M.Sc., Ph.D',
@@ -257,15 +388,21 @@ class ComprehensiveUserSeeder extends Seeder
         }
 
         $this->command->info('✅ Created ' . count($users) . ' comprehensive test users');
-        $this->command->info('📊 Coverage:');
-        $this->command->info('   - Pelaksana Pemula: 1 user');
-        $this->command->info('   - Pelaksana: 2 users');
-        $this->command->info('   - Pelaksana Lanjutan: 2 users');
-        $this->command->info('   - Penyelia: 2 users');
-        $this->command->info('   - PTI Pertama: 2 users');
-        $this->command->info('   - PTI Muda: 2 users');
-        $this->command->info('   - PTI Madya: 2 users');
-        $this->command->info('   - PTI Utama: 2 users');
+        $this->command->info('📊 Coverage: 100% semua kombinasi golongan (PR No. 3/2025)');
+        $this->command->info('');
+        $this->command->info('   JALUR TERAMPIL:');
+        $this->command->info('   - Pelaksana Pemula: 1 user (II/a)');
+        $this->command->info('   - Pelaksana: 3 users (II/b, II/c, II/d)');
+        $this->command->info('   - Pelaksana Lanjutan: 3 users (III/a, III/b, III/c)');
+        $this->command->info('   - Penyelia: 3 users (III/d, IV/a, IV/c)');
+        $this->command->info('');
+        $this->command->info('   JALUR AHLI:');
+        $this->command->info('   - PTI Pertama: 4 users (III/a, III/b, III/c, III/d)');
+        $this->command->info('   - PTI Muda: 4 users (III/b, III/c, III/d, IV/b)');
+        $this->command->info('   - PTI Madya: 4 users (IV/a, IV/b, IV/c, IV/d)');
+        $this->command->info('   - PTI Utama: 3 users (IV/d, IV/e, IV/e)');
+        $this->command->info('');
         $this->command->info('🔑 Default password for all: password123');
+        $this->command->info('📈 Total: 28 users covering 27 unique golongan combinations');
     }
 }
