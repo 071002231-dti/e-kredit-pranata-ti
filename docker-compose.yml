@@ -70,78 +70,78 @@ services:
       - redis
 
   # =============================================================================
-  # WhatsApp Microservice
+  # WhatsApp Microservice (DISABLED - Enable when Facebook issue resolved)
   # =============================================================================
-  whatsapp-service:
-    build:
-      context: ./whatsapp-service
-      dockerfile: docker/Dockerfile
-    container_name: whatsapp-service
-    restart: unless-stopped
-    ports:
-      - "${WHATSAPP_PORT:-8080}:80"
-    environment:
-      - APP_ENV=${APP_ENV:-production}
-      - APP_KEY=${WHATSAPP_APP_KEY}
-      - APP_DEBUG=${APP_DEBUG:-false}
-      - DB_CONNECTION=mysql
-      - DB_HOST=whatsapp-db
-      - DB_PORT=3306
-      - DB_DATABASE=whatsapp_db
-      - DB_USERNAME=${WHATSAPP_DB_USERNAME:-whatsapp}
-      - DB_PASSWORD=${WHATSAPP_DB_PASSWORD}
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - QUEUE_CONNECTION=redis
-      - MAIN_APP_URL=http://app
-      - MAIN_APP_INTERNAL_KEY=${INTERNAL_API_KEY}
-      - SERVICE_API_KEY=${WHATSAPP_SERVICE_KEY}
-      - WHATSAPP_API_TOKEN=${WHATSAPP_API_TOKEN}
-      - WHATSAPP_PHONE_NUMBER_ID=${WHATSAPP_PHONE_NUMBER_ID}
-      - WHATSAPP_BUSINESS_ACCOUNT_ID=${WHATSAPP_BUSINESS_ACCOUNT_ID}
-      - WHATSAPP_WEBHOOK_VERIFY_TOKEN=${WHATSAPP_WEBHOOK_VERIFY_TOKEN}
-      - WHATSAPP_WEBHOOK_SECRET=${WHATSAPP_WEBHOOK_SECRET}
-    volumes:
-      - ./whatsapp-service/storage:/var/www/html/storage
-    networks:
-      - app-network
-    depends_on:
-      whatsapp-db:
-        condition: service_healthy
-      redis:
-        condition: service_started
+  # whatsapp-service:
+  #   build:
+  #     context: ./whatsapp-service
+  #     dockerfile: docker/Dockerfile
+  #   container_name: whatsapp-service
+  #   restart: unless-stopped
+  #   ports:
+  #     - "${WHATSAPP_PORT:-8080}:80"
+  #   environment:
+  #     - APP_ENV=${APP_ENV:-production}
+  #     - APP_KEY=${WHATSAPP_APP_KEY}
+  #     - APP_DEBUG=${APP_DEBUG:-false}
+  #     - DB_CONNECTION=mysql
+  #     - DB_HOST=whatsapp-db
+  #     - DB_PORT=3306
+  #     - DB_DATABASE=whatsapp_db
+  #     - DB_USERNAME=${WHATSAPP_DB_USERNAME:-whatsapp}
+  #     - DB_PASSWORD=${WHATSAPP_DB_PASSWORD}
+  #     - REDIS_HOST=redis
+  #     - REDIS_PORT=6379
+  #     - QUEUE_CONNECTION=redis
+  #     - MAIN_APP_URL=http://app
+  #     - MAIN_APP_INTERNAL_KEY=${INTERNAL_API_KEY}
+  #     - SERVICE_API_KEY=${WHATSAPP_SERVICE_KEY}
+  #     - WHATSAPP_API_TOKEN=${WHATSAPP_API_TOKEN}
+  #     - WHATSAPP_PHONE_NUMBER_ID=${WHATSAPP_PHONE_NUMBER_ID}
+  #     - WHATSAPP_BUSINESS_ACCOUNT_ID=${WHATSAPP_BUSINESS_ACCOUNT_ID}
+  #     - WHATSAPP_WEBHOOK_VERIFY_TOKEN=${WHATSAPP_WEBHOOK_VERIFY_TOKEN}
+  #     - WHATSAPP_WEBHOOK_SECRET=${WHATSAPP_WEBHOOK_SECRET}
+  #   volumes:
+  #     - ./whatsapp-service/storage:/var/www/html/storage
+  #   networks:
+  #     - app-network
+  #   depends_on:
+  #     whatsapp-db:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_started
 
-  # WhatsApp service queue worker
-  whatsapp-worker:
-    build:
-      context: ./whatsapp-service
-      dockerfile: docker/Dockerfile
-    container_name: whatsapp-worker
-    restart: unless-stopped
-    command: php artisan queue:work redis --queue=webhooks,notifications,sync --sleep=3 --tries=3
-    environment:
-      - APP_ENV=${APP_ENV:-production}
-      - APP_KEY=${WHATSAPP_APP_KEY}
-      - DB_CONNECTION=mysql
-      - DB_HOST=whatsapp-db
-      - DB_PORT=3306
-      - DB_DATABASE=whatsapp_db
-      - DB_USERNAME=${WHATSAPP_DB_USERNAME:-whatsapp}
-      - DB_PASSWORD=${WHATSAPP_DB_PASSWORD}
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - QUEUE_CONNECTION=redis
-      - MAIN_APP_URL=http://app
-      - MAIN_APP_INTERNAL_KEY=${INTERNAL_API_KEY}
-      - WHATSAPP_API_TOKEN=${WHATSAPP_API_TOKEN}
-      - WHATSAPP_PHONE_NUMBER_ID=${WHATSAPP_PHONE_NUMBER_ID}
-    volumes:
-      - ./whatsapp-service/storage:/var/www/html/storage
-    networks:
-      - app-network
-    depends_on:
-      - whatsapp-db
-      - redis
+  # WhatsApp service queue worker (DISABLED)
+  # whatsapp-worker:
+  #   build:
+  #     context: ./whatsapp-service
+  #     dockerfile: docker/Dockerfile
+  #   container_name: whatsapp-worker
+  #   restart: unless-stopped
+  #   command: php artisan queue:work redis --queue=webhooks,notifications,sync --sleep=3 --tries=3
+  #   environment:
+  #     - APP_ENV=${APP_ENV:-production}
+  #     - APP_KEY=${WHATSAPP_APP_KEY}
+  #     - DB_CONNECTION=mysql
+  #     - DB_HOST=whatsapp-db
+  #     - DB_PORT=3306
+  #     - DB_DATABASE=whatsapp_db
+  #     - DB_USERNAME=${WHATSAPP_DB_USERNAME:-whatsapp}
+  #     - DB_PASSWORD=${WHATSAPP_DB_PASSWORD}
+  #     - REDIS_HOST=redis
+  #     - REDIS_PORT=6379
+  #     - QUEUE_CONNECTION=redis
+  #     - MAIN_APP_URL=http://app
+  #     - MAIN_APP_INTERNAL_KEY=${INTERNAL_API_KEY}
+  #     - WHATSAPP_API_TOKEN=${WHATSAPP_API_TOKEN}
+  #     - WHATSAPP_PHONE_NUMBER_ID=${WHATSAPP_PHONE_NUMBER_ID}
+  #   volumes:
+  #     - ./whatsapp-service/storage:/var/www/html/storage
+  #   networks:
+  #     - app-network
+  #   depends_on:
+  #     - whatsapp-db
+  #     - redis
 
   # =============================================================================
   # Databases
@@ -165,24 +165,25 @@ services:
       timeout: 5s
       retries: 5
 
-  whatsapp-db:
-    image: mysql:8.0
-    container_name: whatsapp-mysql
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: ${WHATSAPP_DB_ROOT_PASSWORD}
-      MYSQL_DATABASE: whatsapp_db
-      MYSQL_USER: ${WHATSAPP_DB_USERNAME:-whatsapp}
-      MYSQL_PASSWORD: ${WHATSAPP_DB_PASSWORD}
-    volumes:
-      - whatsapp-db-data:/var/lib/mysql
-    networks:
-      - app-network
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${WHATSAPP_DB_ROOT_PASSWORD}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+  # WhatsApp Database (DISABLED)
+  # whatsapp-db:
+  #   image: mysql:8.0
+  #   container_name: whatsapp-mysql
+  #   restart: unless-stopped
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: ${WHATSAPP_DB_ROOT_PASSWORD}
+  #     MYSQL_DATABASE: whatsapp_db
+  #     MYSQL_USER: ${WHATSAPP_DB_USERNAME:-whatsapp}
+  #     MYSQL_PASSWORD: ${WHATSAPP_DB_PASSWORD}
+  #   volumes:
+  #     - whatsapp-db-data:/var/lib/mysql
+  #   networks:
+  #     - app-network
+  #   healthcheck:
+  #     test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${WHATSAPP_DB_ROOT_PASSWORD}"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
 
   # =============================================================================
   # Redis (Shared)
@@ -207,5 +208,5 @@ networks:
 
 volumes:
   mysql-data:
-  whatsapp-db-data:
+  # whatsapp-db-data:  # DISABLED
   redis-data:
