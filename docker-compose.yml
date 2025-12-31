@@ -1,0 +1,213 @@
+version: '3.8'
+
+services:
+  # =============================================================================
+  # Main Application (e-kredit)
+  # =============================================================================
+  app:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: e-kredit-app
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-80}:80"
+    environment:
+      - APP_ENV=${APP_ENV:-production}
+      - APP_KEY=${APP_KEY}
+      - APP_DEBUG=${APP_DEBUG:-false}
+      - APP_URL=${APP_URL:-http://localhost}
+      - DB_CONNECTION=mysql
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=${DB_DATABASE:-e_kredit}
+      - DB_USERNAME=${DB_USERNAME:-e_kredit}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - CACHE_STORE=redis
+      - QUEUE_CONNECTION=redis
+      - WHATSAPP_SERVICE_URL=http://whatsapp-service
+      - WHATSAPP_SERVICE_KEY=${WHATSAPP_SERVICE_KEY}
+      - INTERNAL_API_KEY=${INTERNAL_API_KEY}
+    volumes:
+      - ./backend/storage:/var/www/html/storage
+      - ./backend/public:/var/www/html/public
+    networks:
+      - app-network
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  # Main app queue worker
+  app-worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: e-kredit-worker
+    restart: unless-stopped
+    command: php artisan queue:work redis --sleep=3 --tries=3 --max-time=3600
+    environment:
+      - APP_ENV=${APP_ENV:-production}
+      - APP_KEY=${APP_KEY}
+      - DB_CONNECTION=mysql
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=${DB_DATABASE:-e_kredit}
+      - DB_USERNAME=${DB_USERNAME:-e_kredit}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - QUEUE_CONNECTION=redis
+      - WHATSAPP_SERVICE_URL=http://whatsapp-service
+      - WHATSAPP_SERVICE_KEY=${WHATSAPP_SERVICE_KEY}
+    volumes:
+      - ./backend/storage:/var/www/html/storage
+    networks:
+      - app-network
+    depends_on:
+      - mysql
+      - redis
+
+  # =============================================================================
+  # WhatsApp Microservice
+  # =============================================================================
+  whatsapp-service:
+    build:
+      context: ./whatsapp-service
+      dockerfile: docker/Dockerfile
+    container_name: whatsapp-service
+    restart: unless-stopped
+    ports:
+      - "${WHATSAPP_PORT:-8080}:80"
+    environment:
+      - APP_ENV=${APP_ENV:-production}
+      - APP_KEY=${WHATSAPP_APP_KEY}
+      - APP_DEBUG=${APP_DEBUG:-false}
+      - DB_CONNECTION=mysql
+      - DB_HOST=whatsapp-db
+      - DB_PORT=3306
+      - DB_DATABASE=whatsapp_db
+      - DB_USERNAME=${WHATSAPP_DB_USERNAME:-whatsapp}
+      - DB_PASSWORD=${WHATSAPP_DB_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - QUEUE_CONNECTION=redis
+      - MAIN_APP_URL=http://app
+      - MAIN_APP_INTERNAL_KEY=${INTERNAL_API_KEY}
+      - SERVICE_API_KEY=${WHATSAPP_SERVICE_KEY}
+      - WHATSAPP_API_TOKEN=${WHATSAPP_API_TOKEN}
+      - WHATSAPP_PHONE_NUMBER_ID=${WHATSAPP_PHONE_NUMBER_ID}
+      - WHATSAPP_BUSINESS_ACCOUNT_ID=${WHATSAPP_BUSINESS_ACCOUNT_ID}
+      - WHATSAPP_WEBHOOK_VERIFY_TOKEN=${WHATSAPP_WEBHOOK_VERIFY_TOKEN}
+      - WHATSAPP_WEBHOOK_SECRET=${WHATSAPP_WEBHOOK_SECRET}
+    volumes:
+      - ./whatsapp-service/storage:/var/www/html/storage
+    networks:
+      - app-network
+    depends_on:
+      whatsapp-db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  # WhatsApp service queue worker
+  whatsapp-worker:
+    build:
+      context: ./whatsapp-service
+      dockerfile: docker/Dockerfile
+    container_name: whatsapp-worker
+    restart: unless-stopped
+    command: php artisan queue:work redis --queue=webhooks,notifications,sync --sleep=3 --tries=3
+    environment:
+      - APP_ENV=${APP_ENV:-production}
+      - APP_KEY=${WHATSAPP_APP_KEY}
+      - DB_CONNECTION=mysql
+      - DB_HOST=whatsapp-db
+      - DB_PORT=3306
+      - DB_DATABASE=whatsapp_db
+      - DB_USERNAME=${WHATSAPP_DB_USERNAME:-whatsapp}
+      - DB_PASSWORD=${WHATSAPP_DB_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - QUEUE_CONNECTION=redis
+      - MAIN_APP_URL=http://app
+      - MAIN_APP_INTERNAL_KEY=${INTERNAL_API_KEY}
+      - WHATSAPP_API_TOKEN=${WHATSAPP_API_TOKEN}
+      - WHATSAPP_PHONE_NUMBER_ID=${WHATSAPP_PHONE_NUMBER_ID}
+    volumes:
+      - ./whatsapp-service/storage:/var/www/html/storage
+    networks:
+      - app-network
+    depends_on:
+      - whatsapp-db
+      - redis
+
+  # =============================================================================
+  # Databases
+  # =============================================================================
+  mysql:
+    image: mysql:8.0
+    container_name: e-kredit-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE:-e_kredit}
+      MYSQL_USER: ${DB_USERNAME:-e_kredit}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  whatsapp-db:
+    image: mysql:8.0
+    container_name: whatsapp-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${WHATSAPP_DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: whatsapp_db
+      MYSQL_USER: ${WHATSAPP_DB_USERNAME:-whatsapp}
+      MYSQL_PASSWORD: ${WHATSAPP_DB_PASSWORD}
+    volumes:
+      - whatsapp-db-data:/var/lib/mysql
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${WHATSAPP_DB_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # =============================================================================
+  # Redis (Shared)
+  # =============================================================================
+  redis:
+    image: redis:alpine
+    container_name: e-kredit-redis
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mysql-data:
+  whatsapp-db-data:
+  redis-data:

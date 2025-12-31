@@ -1,0 +1,57 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+!.env.example
+!.env.production
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build outputs
+/build
+/dist
+web-client/dist/
+
+# Laravel
+storage/*.key
+storage/logs/*
+!storage/logs/.gitkeep
+storage/framework/cache/*
+!storage/framework/cache/.gitkeep
+storage/framework/sessions/*
+!storage/framework/sessions/.gitkeep
+storage/framework/views/*
+!storage/framework/views/.gitkeep
+bootstrap/cache/*
+!bootstrap/cache/.gitkeep
+
+# Testing
+.phpunit.result.cache
+coverage/
+
+# Misc
+*.pdf
+*.bak
+backend_backup/
+archive/
+
+# Claude
+.claude/
