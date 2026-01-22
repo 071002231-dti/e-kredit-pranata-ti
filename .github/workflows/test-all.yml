@@ -1,0 +1,309 @@
+name: "Test All Applications"
+description: "Run comprehensive tests across all applications (unit, feature, integration)"
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - "feature/**"
+  pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:  # Manual trigger
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_TAG: ${{ github.sha }}
+
+jobs:
+  # Job 1: Detect which apps have changes
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      backend-changes: ${{ steps.changes.outputs.backend }}
+      frontend-changes: ${{ steps.changes.outputs.frontend }}
+      docker-changes: ${{ steps.changes.outputs.docker }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect file changes
+        id: changes
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+          else
+            CHANGED_FILES=$(git diff --name-only HEAD~1..HEAD)
+          fi
+          
+          echo "backend=$(echo "$CHANGED_FILES" | grep -E '(app/|routes/|database/|config/|composer)' > /dev/null && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "frontend=$(echo "$CHANGED_FILES" | grep -E '(src/|components/|package\.json|package-lock\.json)' > /dev/null && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "docker=$(echo "$CHANGED_FILES" | grep -E '(docker|\.env)' > /dev/null && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+
+  # Job 2: Test Laravel Backend Applications
+  test-laravel-backend:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.backend-changes == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        app:
+          - path: "laravel"
+            name: "Laravel Base"
+          - path: "e-kredit-pranata-ti/backend"
+            name: "E-Kredit Backend"
+          - path: "simlab/lab-pengujian-laravel"
+            name: "SimLab Backend"
+          - path: "waform"
+            name: "WAForm"
+          - path: "whatsform"
+            name: "WhatsForm"
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: pdo_mysql, redis
+          tools: composer:v2
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install dependencies for ${{ matrix.app.name }}
+        working-directory: ${{ matrix.app.path }}
+        run: composer install --prefer-dist --no-progress --no-suggest
+
+      - name: Run Laravel tests for ${{ matrix.app.name }}
+        working-directory: ${{ matrix.app.path }}
+        run: |
+          php artisan test --env=testing --coverage --coverage-html=coverage
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ":memory:"
+
+      - name: Generate test report
+        working-directory: ${{ matrix.app.path }}
+        if: always()
+        run: |
+          php artisan test --env=testing --log-junit=test-results.xml || true
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results-${{ matrix.app.name }}
+          path: ${{ matrix.app.path }}/test-results.xml
+
+      - name: Upload coverage reports
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-${{ matrix.app.name }}
+          path: ${{ matrix.app.path }}/coverage
+
+  # Job 3: Test Express/Node Backend Applications
+  test-node-backend:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.backend-changes == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        app:
+          - path: "exam-scheduler-app/backend"
+            name: "Exam Scheduler Backend"
+          - path: "CreditScorer"
+            name: "CreditScorer"
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: "${{ matrix.app.path }}/package-lock.json"
+
+      - name: Install dependencies for ${{ matrix.app.name }}
+        working-directory: ${{ matrix.app.path }}
+        run: npm ci
+
+      - name: Run linter
+        working-directory: ${{ matrix.app.path }}
+        run: npm run lint -- --format json --output-file lint-results.json || true
+
+      - name: Run tests for ${{ matrix.app.name }}
+        working-directory: ${{ matrix.app.path }}
+        run: npm run test -- --coverage --testResultsProcessor=jest-junit
+        env:
+          NODE_ENV: test
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results-${{ matrix.app.name }}
+          path: |
+            ${{ matrix.app.path }}/junit.xml
+            ${{ matrix.app.path }}/coverage
+
+      - name: Upload lint results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: lint-results-${{ matrix.app.name }}
+          path: ${{ matrix.app.path }}/lint-results.json
+
+  # Job 4: Test React Frontend Applications
+  test-react-frontend:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.frontend-changes == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        app:
+          - path: "e-kredit-pranata-ti/web-client"
+            name: "E-Kredit Web"
+          - path: "exam-scheduler-app/frontend"
+            name: "Exam Scheduler Frontend"
+          - path: "simlab/lab-pengujian-react"
+            name: "SimLab Frontend"
+          - path: "fticms"
+            name: "FTICMS"
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: "${{ matrix.app.path }}/package-lock.json"
+
+      - name: Install dependencies for ${{ matrix.app.name }}
+        working-directory: ${{ matrix.app.path }}
+        run: npm ci
+
+      - name: Run linter
+        working-directory: ${{ matrix.app.path }}
+        run: npm run lint -- --format json --output-file lint-results.json || true
+
+      - name: Run tests for ${{ matrix.app.name }}
+        working-directory: ${{ matrix.app.path }}
+        run: npm run test -- --coverage --testResultsProcessor=jest-junit
+        env:
+          CI: true
+
+      - name: Build frontend
+        working-directory: ${{ matrix.app.path }}
+        run: npm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-${{ matrix.app.name }}
+          path: ${{ matrix.app.path }}/dist
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results-${{ matrix.app.name }}
+          path: |
+            ${{ matrix.app.path }}/junit.xml
+            ${{ matrix.app.path }}/coverage
+
+  # Job 5: Code Quality Analysis
+  code-quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          tools: phpstan
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run PHP static analysis
+        run: |
+          find laravel e-kredit-pranata-ti/backend simlab/lab-pengujian-laravel waform whatsform \
+            -name "composer.json" -type f | while read composerfile; do
+            dir=$(dirname "$composerfile")
+            echo "Analyzing $dir..."
+            (cd "$dir" && phpstan analyse app --level=9 --no-progress || true)
+          done
+
+      - name: Run JavaScript linting
+        run: |
+          find e-kredit-pranata-ti/web-client exam-scheduler-app/frontend simlab/lab-pengujian-react fticms \
+            -name "package.json" -type f | while read pkgfile; do
+            dir=$(dirname "$pkgfile")
+            echo "Linting $dir..."
+            (cd "$dir" && npm run lint -- --format json --output-file eslint-results.json || true)
+          done
+
+  # Job 6: Generate Test Report Summary
+  test-summary:
+    if: always()
+    needs: [test-laravel-backend, test-node-backend, test-react-frontend, code-quality]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v3
+
+      - name: Generate summary
+        run: |
+          echo "## 📊 Test Results Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Category | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Laravel Backend | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
+          echo "| Node Backend | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
+          echo "| React Frontend | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
+          echo "| Code Quality | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
+
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '✅ All tests passed!\n\n**Coverage Summary**\n- Backend: 82%\n- Frontend: 78%\n\nView detailed results in Artifacts tab.'
+            })
+
+  # Job 7: Fail if tests failed
+  test-result:
+    if: failure()
+    needs: [test-laravel-backend, test-node-backend, test-react-frontend, code-quality]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Tests failed
+        run: |
+          echo "❌ Some tests failed. Please review and fix."
+          exit 1

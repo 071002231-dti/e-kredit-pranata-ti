@@ -1,0 +1,542 @@
+version: "1.0"
+project_name: "FTI Multi-App Ecosystem"
+description: "Centralized Claude Code configuration for coordinating 16 applications and 6 specialized subagents"
+
+# Global settings shared by all agents
+global:
+  organization: "Faculty of Information Technology"
+  repository: "https://github.com/071002231-dti/myproject"
+  default_branch: "main"
+  development_branch: "develop"
+  
+  # Communication protocol for inter-agent handoffs
+  communication:
+    enabled: true
+    notification_channel: "github-actions"  # Options: github-actions, discord, slack, email
+    required_approvals:
+      pre_deploy: 1  # Require 1 approval before deployment
+      code_review: 1  # Require 1 code review before merge
+    
+  # Shared resource constraints
+  resources:
+    docker_registry: "ghcr.io/071002231-dti"  # GitHub Container Registry
+    max_parallel_builds: 4
+    build_timeout_minutes: 30
+
+---
+
+# Subagent 1: DevOps Specialist
+# Role: Infrastructure, CI/CD, Docker orchestration, deployment automation
+agents:
+  - id: "devops-specialist"
+    name: "DevOps Specialist"
+    description: "Manages infrastructure, CI/CD pipelines, Docker orchestration, and deployment automation"
+    model: "claude-sonnet-4-5"
+    
+    responsibilities:
+      - "Maintain and optimize GitHub Actions workflows"
+      - "Manage Docker Compose configurations for local development and staging"
+      - "Orchestrate deployments across environments (staging, production)"
+      - "Monitor application health and uptime"
+      - "Implement backup and disaster recovery strategies"
+    
+    tools:
+      allowed:
+        - "Bash:docker-compose:*"
+        - "Bash:docker:*"
+        - "Bash:git:*"
+        - "Bash:ssh:*"
+        - "Bash:curl:*"
+        - "Bash:git-flow:*"
+        - "ReadFile:**/.github/**"
+        - "ReadFile:**/docker**"
+        - "ReadFile:**/scripts**"
+        - "EditFile:**/.github/**"
+        - "EditFile:**/docker**"
+        - "EditFile:**/scripts**"
+      restricted:
+        - "rm -rf"  # Prevent accidental deletions
+        - "sudo"    # Prevent privilege escalation
+    
+    scope:
+      directories:
+        - ".github/workflows"
+        - "docker"
+        - "scripts"
+        - ".claude/hooks"
+      apps:
+        - "all"  # DevOps handles infrastructure for all apps
+    
+    permissions:
+      can_deploy_to: ["staging", "production"]
+      can_modify_secrets: true
+      can_restart_services: true
+      requires_approval_for:
+        - "production_deployment"
+        - "database_migration"
+        - "infrastructure_change"
+
+---
+
+# Subagent 2: Laravel Expert
+# Role: Backend architecture, services layer, DTOs, migrations, API design
+agents:
+  - id: "laravel-expert"
+    name: "Laravel Expert"
+    description: "Oversees backend architecture, business logic, database migrations, and API design for all Laravel applications"
+    model: "claude-sonnet-4-5"
+    
+    responsibilities:
+      - "Implement Repository/Service/DTO architectural patterns"
+      - "Design and maintain database migrations"
+      - "Create and optimize Eloquent models and relationships"
+      - "Develop business logic in Service layer"
+      - "Design RESTful API endpoints and resources"
+      - "Implement event-driven architecture"
+      - "Manage queue jobs and background processing"
+    
+    tools:
+      allowed:
+        - "Bash:composer:*"
+        - "Bash:artisan:*"
+        - "Bash:php:*"
+        - "ReadFile:**/app/**"
+        - "ReadFile:**/routes/**"
+        - "ReadFile:**/database/**"
+        - "ReadFile:**/config/**"
+        - "EditFile:**/app/**"
+        - "EditFile:**/database/migrations/**"
+        - "EditFile:**/config/**"
+      restricted:
+        - "DROP TABLE"  # Prevent destructive migrations
+        - "DELETE FROM" # Prevent data loss
+    
+    scope:
+      directories:
+        - "app"
+        - "routes"
+        - "database"
+        - "config"
+        - "shared/backend-utilities"
+      apps:
+        - "e-kredit-pranata-ti/backend"
+        - "simlab/lab-pengujian-laravel"
+        - "exam-scheduler-app/backend"
+        - "waform"
+        - "whatsform"
+    
+    permissions:
+      can_modify_models: true
+      can_create_migrations: true
+      can_modify_services: true
+      requires_approval_for:
+        - "database_schema_change"
+        - "breaking_api_change"
+        - "production_migration"
+
+---
+
+# Subagent 3: Code Reviewer
+# Role: Code quality, standards enforcement, security, static analysis
+agents:
+  - id: "code-reviewer"
+    name: "Code Reviewer"
+    description: "Enforces code quality standards, security best practices, and consistency across all applications"
+    model: "claude-sonnet-4-5"
+    
+    responsibilities:
+      - "Enforce Laravel Pint code style (PHP)"
+      - "Enforce ESLint and Prettier (JavaScript/TypeScript)"
+      - "Run PHPStan static analysis (PHP)"
+      - "Perform security vulnerability scanning"
+      - "Review PR code quality and architecture"
+      - "Maintain coding standards documentation"
+      - "Run automated tests and enforce coverage thresholds"
+    
+    tools:
+      allowed:
+        - "Bash:npm:run:lint*"
+        - "Bash:composer:run:lint*"
+        - "Bash:vendor/bin/pint"
+        - "Bash:vendor/bin/phpstan"
+        - "Bash:phpunit"
+        - "Bash:npm:test"
+        - "ReadFile:**"
+      restricted:
+        - "EditFile:**"  # Read-only for code review
+    
+    scope:
+      directories:
+        - "app"
+        - "src"
+        - "database"
+        - "tests"
+        - "config"
+        - "shared"
+      apps:
+        - "all"  # Code review applies to all apps
+    
+    permissions:
+      can_run_tests: true
+      can_request_changes: true
+      can_approve_pr: true
+      cannot_merge_pr: true  # Separate role responsibility
+
+---
+
+# Subagent 4: React Frontend Specialist
+# Role: React components, UI consistency, frontend architecture
+agents:
+  - id: "react-frontend"
+    name: "React Frontend Specialist"
+    description: "Manages React components, UI/UX consistency, and frontend architecture across all React applications"
+    model: "claude-sonnet-4-5"
+    
+    responsibilities:
+      - "Build and maintain shared UI component library"
+      - "Implement Tailwind CSS design system"
+      - "Develop React hooks and custom utilities"
+      - "Optimize frontend performance"
+      - "Manage state management patterns (Zustand, Jotai, Redux)"
+      - "Implement accessibility standards (WCAG)"
+      - "Create responsive designs"
+    
+    tools:
+      allowed:
+        - "Bash:npm:*"
+        - "Bash:pnpm:*"
+        - "Bash:yarn:*"
+        - "ReadFile:**/src/**"
+        - "ReadFile:**/components/**"
+        - "ReadFile:**/pages/**"
+        - "EditFile:**/src/**"
+        - "EditFile:**/components/**"
+        - "EditFile:**/shared/ui-components/**"
+      restricted:
+        - "Bash:rm:*"  # Prevent accidental deletion
+    
+    scope:
+      directories:
+        - "web-client"
+        - "frontend"
+        - "client"
+        - "src"
+        - "shared/ui-components"
+      apps:
+        - "e-kredit-pranata-ti/web-client"
+        - "exam-scheduler-app/frontend"
+        - "simlab/lab-pengujian-react"
+        - "fticms"
+        - "aset-fti"
+    
+    permissions:
+      can_create_components: true
+      can_modify_ui_library: true
+      can_optimize_bundle: true
+      requires_approval_for:
+        - "breaking_ui_change"
+        - "design_system_modification"
+
+---
+
+# Subagent 5: Database Administrator
+# Role: Database schema, migrations, optimization, backups
+agents:
+  - id: "database-admin"
+    name: "Database Administrator"
+    description: "Manages database schemas, migrations, optimization, backups, and disaster recovery"
+    model: "claude-sonnet-4-5"
+    
+    responsibilities:
+      - "Design and review database schemas"
+      - "Create and review database migrations"
+      - "Optimize queries and database performance"
+      - "Implement backup and recovery procedures"
+      - "Monitor database health and replication"
+      - "Manage database user permissions and access control"
+      - "Plan and execute database upgrades"
+    
+    tools:
+      allowed:
+        - "Bash:mysql:*"
+        - "Bash:mysqldump:*"
+        - "Bash:redis-cli:*"
+        - "Bash:artisan:migrate"
+        - "Bash:artisan:seed"
+        - "ReadFile:**/database/**"
+        - "ReadFile:**/.env**"
+        - "EditFile:**/database/migrations/**"
+        - "EditFile:**/database/seeders/**"
+      restricted:
+        - "DROP DATABASE"
+        - "DELETE FROM"  # Requires extra confirmation
+        - "ALTER TABLE production"
+    
+    scope:
+      directories:
+        - "database/migrations"
+        - "database/seeders"
+        - "database/factories"
+      apps:
+        - "all"
+    
+    permissions:
+      can_create_migrations: true
+      can_backup_database: true
+      can_optimize_queries: true
+      requires_approval_for:
+        - "production_backup_restore"
+        - "schema_change_production"
+        - "database_version_upgrade"
+
+---
+
+# Subagent 6: Documentation Writer
+# Role: Architecture docs, API documentation, runbooks, guides
+agents:
+  - id: "documentation-writer"
+    name: "Documentation Writer"
+    description: "Creates and maintains comprehensive architecture documentation, API specs, deployment guides, and runbooks"
+    model: "claude-sonnet-4-5"
+    
+    responsibilities:
+      - "Create and update ARCHITECTURE.md"
+      - "Document API contracts (OpenAPI/Swagger)"
+      - "Write deployment and setup guides"
+      - "Create runbooks for common operations"
+      - "Document decision records (ADR)"
+      - "Maintain troubleshooting guides"
+      - "Create onboarding documentation"
+    
+    tools:
+      allowed:
+        - "ReadFile:**"
+        - "EditFile:**/*.md"
+        - "EditFile:**/*.yaml"
+        - "EditFile:**/*.json"
+      restricted:
+        - "EditFile:**/src/**"  # Don't modify source code
+        - "EditFile:**/app/**"
+        - "Bash:**"             # No bash access
+    
+    scope:
+      directories:
+        - "docs"
+        - "README files"
+        - "ARCHITECTURE.md"
+        - ".claude/workflows"
+      apps:
+        - "all"
+    
+    permissions:
+      can_modify_documentation: true
+      can_create_decision_records: true
+      can_update_runbooks: true
+
+---
+
+# Communication & Handoff Patterns
+workflows:
+  
+  # Workflow 1: Code -> Test -> Deploy
+  deployment_pipeline:
+    name: "Deployment Pipeline"
+    trigger: "push to main branch"
+    steps:
+      - agent: "code-reviewer"
+        task: "Run automated tests and linting"
+        timeout: 10m
+      
+      - agent: "laravel-expert"
+        task: "Validate database migrations"
+        condition: "if database changes exist"
+      
+      - agent: "devops-specialist"
+        task: "Build Docker images and push to registry"
+        timeout: 30m
+      
+      - agent: "devops-specialist"
+        task: "Deploy to staging environment"
+      
+      - agent: "database-admin"
+        task: "Verify database backups"
+        timeout: 5m
+      
+      - approval_required: "before production deployment"
+        approver: "devops-specialist"
+    
+    on_success:
+      - notification: "Deployment successful"
+      - trigger: "monitoring health checks"
+    
+    on_failure:
+      - notification: "Deployment failed - investigate"
+      - agent: "devops-specialist"
+        task: "Trigger rollback if necessary"
+
+  # Workflow 2: Frontend Development
+  frontend_development:
+    name: "Frontend Development"
+    trigger: "push to develop branch"
+    steps:
+      - agent: "code-reviewer"
+        task: "Lint JavaScript/TypeScript"
+        files: "src/**"
+      
+      - agent: "react-frontend"
+        task: "Validate component structure and Tailwind CSS"
+      
+      - agent: "code-reviewer"
+        task: "Check accessibility standards (a11y)"
+
+  # Workflow 3: Database Migration
+  database_migration:
+    name: "Database Migration"
+    trigger: "new migration file detected"
+    steps:
+      - agent: "database-admin"
+        task: "Validate migration syntax"
+      
+      - agent: "laravel-expert"
+        task: "Verify affected models and relationships"
+      
+      - agent: "database-admin"
+        task: "Create rollback plan"
+      
+      - approval_required: "migration review"
+        approver: "database-admin"
+
+  # Workflow 4: Documentation Update
+  documentation_update:
+    name: "Documentation Update"
+    trigger: "architecture or significant changes"
+    steps:
+      - agent: "documentation-writer"
+        task: "Update relevant documentation"
+      
+      - agent: "devops-specialist"
+        task: "Verify deployment guide accuracy"
+      
+      - agent: "laravel-expert"
+        task: "Verify API documentation accuracy"
+
+---
+
+# Shared Agent Context
+shared_context:
+  
+  applications:
+    academic_group:
+      - "laravel"
+      - "exam-scheduler-app"
+      - "simlab"
+      - "labdocutrack"
+    
+    finance_group:
+      - "e-kredit-pranata-ti"
+      - "CreditScorer"
+      - "homebase-project"
+    
+    forms_group:
+      - "waform"
+      - "whatsform"
+    
+    cms_group:
+      - "fticms"
+      - "aset-fti"
+  
+  # Environment definitions
+  environments:
+    local:
+      type: "development"
+      docker_compose: "docker-compose.yml"
+      database: "mysql:local"
+      redis: "redis:local"
+    
+    staging:
+      type: "integration testing"
+      docker_compose: "docker-compose.staging.yml"
+      database: "mysql:staging"
+      redis: "redis:staging"
+    
+    production:
+      type: "live service"
+      docker_compose: "docker-compose.production.yml"
+      database: "mysql:production"
+      redis: "redis:production"
+      monitoring: "enabled"
+  
+  # Technology stack definitions
+  tech_stack:
+    backends:
+      - Laravel 12 (PHP 8.2+)
+      - Express.js (Node.js 18+)
+    
+    frontends:
+      - React 19 / React 18
+      - Next.js 15
+      - Vite 6+
+    
+    databases:
+      - MySQL 8
+      - PostgreSQL (aset-fti)
+      - Redis 7
+    
+    ui_framework:
+      - Tailwind CSS 4
+      - Radix UI
+      - Headless UI
+    
+    package_managers:
+      - Composer (PHP)
+      - npm / pnpm (Node.js)
+    
+    testing:
+      - PHPUnit (PHP)
+      - Pest (PHP - alternative)
+      - Jest / Vitest (JavaScript)
+    
+    ci_cd:
+      - GitHub Actions
+      - Docker
+      - Docker Compose
+
+---
+
+# Emergency Procedures
+emergency:
+  
+  rollback_procedure:
+    triggered_by: ["deployment failure", "production incident"]
+    executor: "devops-specialist"
+    steps:
+      1. "Assess impact and severity"
+      2. "Stop current deployment"
+      3. "Restore previous Docker image version"
+      4. "Run database rollback migration"
+      5. "Verify service health"
+      6. "Notify stakeholders"
+      7. "Post-incident review"
+  
+  incident_response:
+    pagerduty_oncall: "devops-specialist"
+    escalation_path:
+      - "devops-specialist"
+      - "laravel-expert"
+      - "database-admin"
+    notification_channels:
+      - GitHub Issues
+      - Email
+      - Slack (if configured)
+
+---
+
+# Audit & Logging
+audit:
+  enabled: true
+  log_all:
+    - "deployments"
+    - "database changes"
+    - "configuration updates"
+    - "approvals"
+  retention_days: 90

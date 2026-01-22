@@ -1,0 +1,283 @@
+name: "Build Docker Images"
+description: "Build and push Docker images to container registry for all applications"
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - "docker/**"
+      - "*/Dockerfile"
+      - "*/docker-compose.yml"
+      - "app/**"
+      - "src/**"
+      - "config/**"
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_REGISTRY_OWNER: 071002231-dti
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      e-kredit-backend: ${{ steps.changes.outputs.e-kredit-backend }}
+      e-kredit-frontend: ${{ steps.changes.outputs.e-kredit-frontend }}
+      simlab-backend: ${{ steps.changes.outputs.simlab-backend }}
+      simlab-frontend: ${{ steps.changes.outputs.simlab-frontend }}
+      exam-scheduler: ${{ steps.changes.outputs.exam-scheduler }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changes
+        id: changes
+        run: |
+          BASE_REF=${{ github.base_ref || github.event.before }}
+          HEAD_REF=${{ github.ref }}
+          
+          CHANGED_FILES=$(git diff --name-only $BASE_REF...$HEAD_REF || git diff --name-only HEAD~1..HEAD || echo "")
+          
+          echo "e-kredit-backend=$(echo "$CHANGED_FILES" | grep -E 'e-kredit-pranata-ti/backend|docker' > /dev/null && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "e-kredit-frontend=$(echo "$CHANGED_FILES" | grep -E 'e-kredit-pranata-ti/web-client' > /dev/null && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "simlab-backend=$(echo "$CHANGED_FILES" | grep -E 'simlab/lab-pengujian-laravel' > /dev/null && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "simlab-frontend=$(echo "$CHANGED_FILES" | grep -E 'simlab/lab-pengujian-react' > /dev/null && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "exam-scheduler=$(echo "$CHANGED_FILES" | grep -E 'exam-scheduler-app' > /dev/null && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+
+  build-e-kredit-backend:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.e-kredit-backend == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_REGISTRY_OWNER }}/e-kredit-backend
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: e-kredit-pranata-ti/backend
+          file: e-kredit-pranata-ti/backend/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_REGISTRY_OWNER }}/e-kredit-backend:buildcache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_REGISTRY_OWNER }}/e-kredit-backend:buildcache,mode=max
+
+  build-e-kredit-frontend:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.e-kredit-frontend == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_REGISTRY_OWNER }}/e-kredit-web
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=semver,pattern={{version}}
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: e-kredit-pranata-ti/web-client
+          file: e-kredit-pranata-ti/web-client/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  build-simlab-backend:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.simlab-backend == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_REGISTRY_OWNER }}/simlab-backend
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: simlab/lab-pengujian-laravel
+          file: simlab/lab-pengujian-laravel/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  build-simlab-frontend:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.simlab-frontend == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_REGISTRY_OWNER }}/simlab-frontend
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: simlab/lab-pengujian-react
+          file: simlab/lab-pengujian-react/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  build-exam-scheduler:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.exam-scheduler == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata for backend
+        id: meta-backend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_REGISTRY_OWNER }}/exam-scheduler-backend
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push backend
+        uses: docker/build-push-action@v5
+        with:
+          context: exam-scheduler-app/backend
+          file: exam-scheduler-app/backend/Dockerfile
+          push: true
+          tags: ${{ steps.meta-backend.outputs.tags }}
+          labels: ${{ steps.meta-backend.outputs.labels }}
+
+      - name: Extract metadata for frontend
+        id: meta-frontend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_REGISTRY_OWNER }}/exam-scheduler-frontend
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: exam-scheduler-app/frontend
+          file: exam-scheduler-app/frontend/Dockerfile
+          push: true
+          tags: ${{ steps.meta-frontend.outputs.tags }}
+          labels: ${{ steps.meta-frontend.outputs.labels }}
+
+  build-summary:
+    if: always()
+    needs: [build-e-kredit-backend, build-e-kredit-frontend, build-simlab-backend, build-simlab-frontend, build-exam-scheduler]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate summary
+        run: |
+          echo "## 🐳 Docker Image Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Image | Status | Registry |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|----------|" >> $GITHUB_STEP_SUMMARY
+          echo "| e-kredit-backend | ✅ | ${{ env.REGISTRY }}/${{ env.IMAGE_REGISTRY_OWNER }}/e-kredit-backend |" >> $GITHUB_STEP_SUMMARY
+          echo "| e-kredit-web | ✅ | ${{ env.REGISTRY }}/${{ env.IMAGE_REGISTRY_OWNER }}/e-kredit-web |" >> $GITHUB_STEP_SUMMARY
+          echo "| simlab-backend | ✅ | ${{ env.REGISTRY }}/${{ env.IMAGE_REGISTRY_OWNER }}/simlab-backend |" >> $GITHUB_STEP_SUMMARY
+          echo "| simlab-frontend | ✅ | ${{ env.REGISTRY }}/${{ env.IMAGE_REGISTRY_OWNER }}/simlab-frontend |" >> $GITHUB_STEP_SUMMARY

@@ -1,0 +1,225 @@
+{
+  "version": "1.0",
+  "project": {
+    "name": "FTI Multi-App Ecosystem",
+    "root": "/Users/4h3/myproject",
+    "timezone": "Asia/Jakarta"
+  },
+  
+  "model": {
+    "default": "claude-sonnet-4-5",
+    "temperature": 0.7,
+    "max_tokens": 4096
+  },
+  
+  "permissions": {
+    "global_allow": [
+      "ReadFile:**",
+      "Bash:git:*",
+      "Bash:curl:*",
+      "Bash:echo:*",
+      "Bash:pwd:*",
+      "Bash:ls:*",
+      "Bash:cat:*"
+    ],
+    "global_restrict": [
+      "rm -rf",
+      "sudo rm",
+      "DROP TABLE",
+      "DELETE FROM",
+      ":q!",
+      "reboot",
+      "shutdown"
+    ],
+    "require_human_approval": [
+      "production deployment",
+      "database schema change",
+      "credential modification",
+      "infrastructure change",
+      "service restart",
+      "backup restore"
+    ]
+  },
+  
+  "tools": {
+    "enabled": [
+      "Bash",
+      "ReadFile",
+      "EditFile",
+      "CreateFile",
+      "grep",
+      "find"
+    ],
+    "docker": {
+      "enabled": true,
+      "registry": "ghcr.io/071002231-dti",
+      "max_concurrent_builds": 4,
+      "build_timeout_seconds": 1800
+    },
+    "git": {
+      "enabled": true,
+      "auto_commit": false,
+      "branches_protected": [
+        "main",
+        "production"
+      ]
+    }
+  },
+  
+  "environments": {
+    "local": {
+      "type": "development",
+      "database_host": "localhost",
+      "database_port": 3306,
+      "redis_host": "localhost",
+      "redis_port": 6379,
+      "log_level": "debug",
+      "debug": true
+    },
+    "staging": {
+      "type": "integration",
+      "database_host": "mysql-staging",
+      "database_port": 3306,
+      "redis_host": "redis-staging",
+      "redis_port": 6379,
+      "log_level": "info",
+      "debug": false,
+      "requires_approval": true
+    },
+    "production": {
+      "type": "live",
+      "database_host": "mysql-production",
+      "database_port": 3306,
+      "redis_host": "redis-production",
+      "redis_port": 6379,
+      "log_level": "warn",
+      "debug": false,
+      "requires_approval": true,
+      "monitoring": true,
+      "backup_before_change": true
+    }
+  },
+  
+  "applications": {
+    "groups": {
+      "academic": [
+        "laravel",
+        "exam-scheduler-app",
+        "simlab",
+        "labdocutrack"
+      ],
+      "finance": [
+        "e-kredit-pranata-ti",
+        "CreditScorer",
+        "homebase-project"
+      ],
+      "forms": [
+        "waform",
+        "whatsform"
+      ],
+      "cms": [
+        "fticms",
+        "aset-fti"
+      ]
+    },
+    "production_critical": [
+      "e-kredit-pranata-ti",
+      "exam-scheduler-app"
+    ]
+  },
+  
+  "ci_cd": {
+    "provider": "github-actions",
+    "auto_test_on_push": true,
+    "auto_build_on_merge": true,
+    "auto_deploy_staging": true,
+    "auto_deploy_production": false,
+    "min_approvals_production": 1,
+    "notification": {
+      "enabled": true,
+      "channels": [
+        "github-actions"
+      ]
+    }
+  },
+  
+  "database": {
+    "isolation": "per-application",
+    "backup": {
+      "enabled": true,
+      "schedule": "daily",
+      "retention_days": 30,
+      "before_production_change": true
+    },
+    "migration": {
+      "auto_rollback_on_failure": true,
+      "require_migration_review": true,
+      "test_migration_before_prod": true
+    }
+  },
+  
+  "docker": {
+    "base_image_php": "php:8.3-fpm-alpine",
+    "base_image_node": "node:20-alpine",
+    "base_image_db": "mysql:8-oracle",
+    "base_image_cache": "redis:7-alpine",
+    "compose_version": "3.9",
+    "network": "fti-network",
+    "volumes": {
+      "mysql_data": "mysql_data",
+      "redis_data": "redis_data"
+    }
+  },
+  
+  "testing": {
+    "run_on_every_push": true,
+    "min_coverage": 70,
+    "fail_on_low_coverage": true,
+    "framework_php": "phpunit",
+    "framework_js": "jest"
+  },
+  
+  "code_quality": {
+    "php_linter": "pint",
+    "js_linter": "eslint",
+    "static_analysis": "phpstan",
+    "security_scan": true,
+    "auto_fix": false
+  },
+  
+  "logging": {
+    "level": "info",
+    "format": "json",
+    "retention_days": 30,
+    "outputs": [
+      {
+        "type": "file",
+        "path": "storage/logs/claude.log"
+      },
+      {
+        "type": "stdout",
+        "level": "warn"
+      }
+    ]
+  },
+  
+  "communication": {
+    "inter_agent": {
+      "enabled": true,
+      "protocol": "json-rpc"
+    },
+    "notifications": {
+      "enabled": true,
+      "channels": {
+        "critical": ["github-actions", "email"],
+        "warning": ["github-actions"],
+        "info": ["github-actions"]
+      }
+    }
+  },
+  
+  "cache": {
+    "enabled": true,
+    "ttl_seconds": 3600
+  }
+}

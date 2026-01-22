@@ -1,0 +1,393 @@
+version: "3.9"
+
+# FTI Multi-App Ecosystem - Local Development Docker Compose
+# This configuration brings up all shared infrastructure + example services
+# Individual apps can override with their own docker-compose.yml files
+
+networks:
+  fti-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.0.0.0/16
+
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+  postgres_data:
+    driver: local
+
+services:
+  # ============================================================================
+  # SHARED INFRASTRUCTURE LAYER
+  # ============================================================================
+
+  # MySQL Database - Primary datastore for Laravel applications
+  mysql:
+    image: mysql:8-oracle
+    container_name: mysql-local
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+      MYSQL_USER: ${DB_USER:-laravel}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
+      MYSQL_DATABASE: ${DB_DATABASE:-laravel}
+      MYSQL_ALLOW_EMPTY_PASSWORD: "no"
+      COLLATION_SERVER: utf8mb4_unicode_ci
+      CHARACTER_SET_SERVER: utf8mb4
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf:ro
+    networks:
+      - fti-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 5s
+      retries: 10
+      interval: 10s
+    restart: unless-stopped
+
+  # Redis Cache & Queue
+  redis:
+    image: redis:7-alpine
+    container_name: redis-local
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis}
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - fti-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      timeout: 5s
+      retries: 10
+      interval: 10s
+    restart: unless-stopped
+
+  # PostgreSQL Database - Alternative for some apps (e.g., aset-fti)
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres-local
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - fti-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      timeout: 5s
+      retries: 10
+      interval: 10s
+    restart: unless-stopped
+    profiles:
+      - postgres  # Optional: enable with --profile postgres
+
+  # Nginx Reverse Proxy - Route traffic to different apps
+  nginx:
+    image: nginx:alpine
+    container_name: nginx-local
+    ports:
+      - "${NGINX_HTTP_PORT:-80}:80"
+      - "${NGINX_HTTPS_PORT:-443}:443"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./docker/nginx/ssl:/etc/nginx/ssl:ro
+    networks:
+      - fti-network
+    depends_on:
+      - mysql
+      - redis
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      timeout: 5s
+      retries: 5
+      interval: 10s
+    restart: unless-stopped
+
+  # ============================================================================
+  # APPLICATION SERVICES
+  # ============================================================================
+
+  # E-Kredit Pranata TI - Production Critical Application
+  e-kredit-backend:
+    build:
+      context: ./e-kredit-pranata-ti/backend
+      dockerfile: Dockerfile
+    container_name: e-kredit-backend
+    environment:
+      APP_NAME: "E-Kredit Pranata TI"
+      APP_ENV: ${APP_ENV:-local}
+      APP_DEBUG: ${APP_DEBUG:-true}
+      APP_URL: ${E_KREDIT_APP_URL:-http://localhost:8001}
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE:-e_kredit}
+      DB_USERNAME: ${DB_USER:-laravel}
+      DB_PASSWORD: ${DB_PASSWORD:-secret}
+      CACHE_DRIVER: redis
+      CACHE_STORE: redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis}
+      QUEUE_CONNECTION: redis
+      SESSION_DRIVER: redis
+      WHATSAPP_SERVICE_URL: http://whatsapp-service:3000
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:-dev-key-12345}
+    ports:
+      - "${E_KREDIT_PORT:-8001}:8000"
+    volumes:
+      - ./e-kredit-pranata-ti/backend:/var/www/html
+      - ./docker/php/php.ini:/usr/local/etc/php/php.ini:ro
+      - ./docker/php/www.conf:/usr/local/etc/php-fpm.d/www.conf:ro
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - fti-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      timeout: 5s
+      retries: 10
+      interval: 10s
+    restart: unless-stopped
+
+  # E-Kredit Frontend
+  e-kredit-frontend:
+    build:
+      context: ./e-kredit-pranata-ti/web-client
+      dockerfile: Dockerfile
+    container_name: e-kredit-frontend
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:8001}
+      NODE_ENV: ${NODE_ENV:-development}
+    ports:
+      - "${E_KREDIT_FRONTEND_PORT:-3001}:5173"
+    volumes:
+      - ./e-kredit-pranata-ti/web-client:/app
+      - /app/node_modules
+    networks:
+      - fti-network
+    depends_on:
+      - e-kredit-backend
+    restart: unless-stopped
+
+  # WhatsApp Service Microservice
+  whatsapp-service:
+    build:
+      context: ./e-kredit-pranata-ti/whatsapp-service
+      dockerfile: Dockerfile
+    container_name: whatsapp-service
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      WHATSAPP_API_URL: ${WHATSAPP_API_URL:-https://api.whatsapp.com}
+      WHATSAPP_API_KEY: ${WHATSAPP_API_KEY:-dev-key}
+      BACKEND_URL: http://e-kredit-backend:8000
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:-dev-key-12345}
+    ports:
+      - "${WHATSAPP_SERVICE_PORT:-3000}:3000"
+    volumes:
+      - ./e-kredit-pranata-ti/whatsapp-service:/app
+      - /app/node_modules
+    networks:
+      - fti-network
+    depends_on:
+      - e-kredit-backend
+    restart: unless-stopped
+    profiles:
+      - e-kredit  # Only start with e-kredit profile
+
+  # SimLab - Lab Testing Simulation
+  simlab-backend:
+    build:
+      context: ./simlab/lab-pengujian-laravel
+      dockerfile: Dockerfile
+    container_name: simlab-backend
+    environment:
+      APP_NAME: "SimLab"
+      APP_ENV: ${APP_ENV:-local}
+      APP_DEBUG: ${APP_DEBUG:-true}
+      APP_URL: ${SIMLAB_APP_URL:-http://localhost:8002}
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: simlab
+      DB_USERNAME: ${DB_USER:-laravel}
+      DB_PASSWORD: ${DB_PASSWORD:-secret}
+      CACHE_DRIVER: redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    ports:
+      - "${SIMLAB_PORT:-8002}:8000"
+    volumes:
+      - ./simlab/lab-pengujian-laravel:/var/www/html
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - fti-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+    profiles:
+      - simlab
+
+  # SimLab Frontend
+  simlab-frontend:
+    build:
+      context: ./simlab/lab-pengujian-react
+      dockerfile: Dockerfile
+    container_name: simlab-frontend
+    environment:
+      VITE_API_URL: ${SIMLAB_VITE_API_URL:-http://localhost:8002}
+      NODE_ENV: ${NODE_ENV:-development}
+    ports:
+      - "${SIMLAB_FRONTEND_PORT:-3002}:5173"
+    volumes:
+      - ./simlab/lab-pengujian-react:/app
+      - /app/node_modules
+    networks:
+      - fti-network
+    depends_on:
+      - simlab-backend
+    restart: unless-stopped
+    profiles:
+      - simlab
+
+  # Exam Scheduler Backend
+  exam-scheduler-backend:
+    build:
+      context: ./exam-scheduler-app/backend
+      dockerfile: Dockerfile
+    container_name: exam-scheduler-backend
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3000
+      DATABASE_URL: ${DATABASE_URL:-mysql://laravel:secret@mysql:3306/exam_scheduler}
+      REDIS_URL: ${REDIS_URL:-redis://:redis@redis:6379}
+    ports:
+      - "${EXAM_SCHEDULER_PORT:-8003}:3000"
+    volumes:
+      - ./exam-scheduler-app/backend:/app
+      - /app/node_modules
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - fti-network
+    restart: unless-stopped
+    profiles:
+      - exam-scheduler
+
+  # Exam Scheduler Frontend
+  exam-scheduler-frontend:
+    build:
+      context: ./exam-scheduler-app/frontend
+      dockerfile: Dockerfile
+    container_name: exam-scheduler-frontend
+    environment:
+      VITE_API_URL: ${EXAM_SCHEDULER_VITE_API_URL:-http://localhost:8003}
+      NODE_ENV: ${NODE_ENV:-development}
+    ports:
+      - "${EXAM_SCHEDULER_FRONTEND_PORT:-3003}:5173"
+    volumes:
+      - ./exam-scheduler-app/frontend:/app
+      - /app/node_modules
+    networks:
+      - fti-network
+    depends_on:
+      - exam-scheduler-backend
+    restart: unless-stopped
+    profiles:
+      - exam-scheduler
+
+  # FTICMS
+  fticms:
+    build:
+      context: ./fticms
+      dockerfile: Dockerfile
+    container_name: fticms
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      VITE_API_URL: ${FTICMS_VITE_API_URL:-http://localhost:8004}
+    ports:
+      - "${FTICMS_PORT:-3004}:5173"
+    volumes:
+      - ./fticms:/app
+      - /app/node_modules
+    networks:
+      - fti-network
+    restart: unless-stopped
+    profiles:
+      - cms
+
+  # ============================================================================
+  # DEVELOPMENT TOOLS (Optional)
+  # ============================================================================
+
+  # phpMyAdmin - MySQL GUI (optional)
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: phpmyadmin-local
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: ${DB_USER:-laravel}
+      PMA_PASSWORD: ${DB_PASSWORD:-secret}
+      PMA_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+    ports:
+      - "${PHPMYADMIN_PORT:-8080}:80"
+    networks:
+      - fti-network
+    depends_on:
+      - mysql
+    restart: unless-stopped
+    profiles:
+      - tools
+
+  # Redis Commander - Redis GUI (optional)
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: redis-commander-local
+    environment:
+      REDIS_HOSTS: local:redis:6379:0:${REDIS_PASSWORD:-redis}
+    ports:
+      - "${REDIS_COMMANDER_PORT:-8081}:8081"
+    networks:
+      - fti-network
+    depends_on:
+      - redis
+    restart: unless-stopped
+    profiles:
+      - tools
+
+  # Mailhog - Email testing (optional)
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: mailhog-local
+    ports:
+      - "${MAILHOG_SMTP_PORT:-1025}:1025"
+      - "${MAILHOG_WEB_PORT:-8025}:8025"
+    networks:
+      - fti-network
+    restart: unless-stopped
+    profiles:
+      - tools
