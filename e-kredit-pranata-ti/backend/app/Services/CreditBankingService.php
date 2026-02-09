@@ -2,6 +2,10 @@
 
 namespace App\Services;
 
+use App\DTOs\CreditBankingDecisionDTO;
+use App\Enums\ActivityStatus;
+use App\Enums\CreditBankStatus;
+use App\Enums\UnsurType;
 use App\Models\User;
 use App\Models\Activity;
 use App\Models\CreditBank;
@@ -32,7 +36,7 @@ class CreditBankingService
      * Credits are banked if they would cause non-compliance
      * or if user hasn't reached minimum for current position
      */
-    public function shouldBankCredits(User $user, Activity $activity): array
+    public function shouldBankCredits(User $user, Activity $activity): CreditBankingDecisionDTO
     {
         // Load creditSchema if not loaded
         if (!$activity->relationLoaded('creditSchema')) {
@@ -40,10 +44,10 @@ class CreditBankingService
         }
 
         if (!$activity->creditSchema) {
-            return [
-                'should_bank' => false,
-                'reason' => 'No credit schema attached',
-            ];
+            return new CreditBankingDecisionDTO(
+                shouldBank: false,
+                reason: 'No credit schema attached',
+            );
         }
 
         // Get user's current credits
@@ -52,54 +56,55 @@ class CreditBankingService
 
         // Add this activity's credits
         $creditPoints = $activity->creditSchema->credit_points;
-        $newUtama = $currentUtama + ($activity->creditSchema->unsur_type === 'utama' ? $creditPoints : 0);
-        $newPenunjang = $currentPenunjang + ($activity->creditSchema->unsur_type === 'penunjang' ? $creditPoints : 0);
+        $isUtama = $activity->creditSchema->unsur_type === UnsurType::UTAMA->value;
+        $newUtama = $currentUtama + ($isUtama ? $creditPoints : 0);
+        $newPenunjang = $currentPenunjang + ($isUtama ? 0 : $creditPoints);
 
         // Check if this would break compliance
         $compliance = $this->complianceService->validateCompliance($newUtama, $newPenunjang);
 
-        if (!$compliance['is_compliant']) {
-            return [
-                'should_bank' => true,
-                'reason' => sprintf(
+        if (!$compliance->isCompliant) {
+            return new CreditBankingDecisionDTO(
+                shouldBank: true,
+                reason: sprintf(
                     'Menambahkan kredit ini akan melanggar aturan 80/20. Unsur %s akan menjadi %.1f%%',
-                    $activity->creditSchema->unsur_type === 'utama' ? 'Utama' : 'Penunjang',
-                    $activity->creditSchema->unsur_type === 'utama' ? $compliance['percentage_utama'] : $compliance['percentage_penunjang']
+                    $isUtama ? 'Utama' : 'Penunjang',
+                    $isUtama ? $compliance->percentageUtama : $compliance->percentagePenunjang
                 ),
-                'compliance' => $compliance,
-            ];
+                compliance: $compliance,
+            );
         }
 
         // Check if user has golongan set
         if (!$user->golongan) {
-            return [
-                'should_bank' => false,
-                'reason' => 'User belum memiliki golongan, kredit langsung masuk',
-            ];
+            return new CreditBankingDecisionDTO(
+                shouldBank: false,
+                reason: 'User belum memiliki golongan, kredit langsung masuk',
+            );
         }
 
         // Check if exceeds current position's maximum
         $target = $this->complianceService->getTargetCredits($user->golongan);
         $nextJenjang = $this->complianceService->getNextJenjang($user->golongan);
 
-        if ($nextJenjang && $compliance['total_credit'] > $target['min_credit']) {
-            return [
-                'should_bank' => true,
-                'reason' => sprintf(
+        if ($nextJenjang && $compliance->totalCredit > $target->minCredit) {
+            return new CreditBankingDecisionDTO(
+                shouldBank: true,
+                reason: sprintf(
                     'Kredit melebihi target untuk %s (%s). Akan disimpan untuk jenjang berikutnya: %s',
-                    $target['jenjang'],
-                    $target['golongan'],
-                    $nextJenjang['jenjang']
+                    $target->jenjang,
+                    $target->golongan,
+                    $nextJenjang->jenjang
                 ),
-                'required_jenjang' => $nextJenjang['jenjang'],
-                'required_golongan' => $nextJenjang['golongan'],
-            ];
+                requiredJenjang: $nextJenjang->jenjang,
+                requiredGolongan: $nextJenjang->golongan,
+            );
         }
 
-        return [
-            'should_bank' => false,
-            'reason' => 'Kredit sesuai dengan posisi saat ini',
-        ];
+        return new CreditBankingDecisionDTO(
+            shouldBank: false,
+            reason: 'Kredit sesuai dengan posisi saat ini',
+        );
     }
 
     /**
@@ -130,7 +135,7 @@ class CreditBankingService
             'credit_points' => $creditPoints,
             'unsur_type' => $activity->creditSchema->unsur_type,
             'activity_category' => $activity->creditSchema->category,
-            'status' => 'banked',
+            'status' => CreditBankStatus::BANKED->value,
             'required_jenjang' => $requiredJenjang ?? 'PK Pelaksana',
             'required_golongan' => $requiredGolongan,
             'current_jenjang_when_banked' => $user->jenjang_jabatan ?? 'Unknown',
@@ -198,8 +203,8 @@ class CreditBankingService
             ->banked()
             ->get();
 
-        $bankedUtama = $bankedCredits->where('unsur_type', 'utama')->sum('credit_points');
-        $bankedPenunjang = $bankedCredits->where('unsur_type', 'penunjang')->sum('credit_points');
+        $bankedUtama = $bankedCredits->where('unsur_type', UnsurType::UTAMA->value)->sum('credit_points');
+        $bankedPenunjang = $bankedCredits->where('unsur_type', UnsurType::PENUNJANG->value)->sum('credit_points');
 
         $user->update([
             'banked_credit_utama' => $bankedUtama,
@@ -232,14 +237,14 @@ class CreditBankingService
             // Skip if this activity is banked and not unlocked
             if (in_array($activity->id, $bankedActivityIds)) {
                 $creditBank = CreditBank::where('activity_id', $activity->id)->first();
-                if ($creditBank && $creditBank->status === 'banked') {
+                if ($creditBank && $creditBank->status === CreditBankStatus::BANKED->value) {
                     continue; // Don't count banked credits
                 }
             }
 
             if ($activity->creditSchema) {
                 $points = $activity->creditSchema->credit_points;
-                if ($activity->creditSchema->unsur_type === 'utama') {
+                if ($activity->creditSchema->unsur_type === UnsurType::UTAMA->value) {
                     $creditUtama += $points;
                 } else {
                     $creditPenunjang += $points;
@@ -291,8 +296,8 @@ class CreditBankingService
             'banked' => [
                 'count' => $bankedCredits->count(),
                 'total_points' => $bankedCredits->sum('credit_points'),
-                'utama' => $bankedCredits->where('unsur_type', 'utama')->sum('credit_points'),
-                'penunjang' => $bankedCredits->where('unsur_type', 'penunjang')->sum('credit_points'),
+                'utama' => $bankedCredits->where('unsur_type', UnsurType::UTAMA->value)->sum('credit_points'),
+                'penunjang' => $bankedCredits->where('unsur_type', UnsurType::PENUNJANG->value)->sum('credit_points'),
                 'items' => $bankedCredits,
             ],
             'unlocked' => [

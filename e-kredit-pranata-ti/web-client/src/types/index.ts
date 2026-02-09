@@ -55,7 +55,7 @@ export interface Activity {
   title: string
   description: string
   proof_file?: string
-  status: 'pending' | 'approved' | 'rejected'
+  status: 'pending' | 'approved' | 'rejected' | 'revision'
   earned_points: string
   submitted_at: string
   reviewed_at?: string

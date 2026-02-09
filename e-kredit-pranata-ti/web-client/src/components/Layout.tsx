@@ -9,7 +9,8 @@ import {
   User,
   LogOut,
   Menu,
-  X
+  X,
+  ClipboardList
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -28,11 +29,19 @@ export function Layout({ children }: LayoutProps) {
     navigate('/login')
   }
 
+  // Menu berdasarkan role:
+  // Admin: Kelola Skema Penilaian, Kelola User & Role
+  // Verifier: Review/Verifikasi Aktivitas
+  // User: Usulan Aktivitas
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['user', 'verifier', 'admin'] },
-    { name: 'Aktivitas Saya', href: '/activities', icon: FileText, roles: ['user', 'verifier', 'admin'] },
-    { name: 'Review Aktivitas', href: '/approvals', icon: CheckSquare, roles: ['verifier', 'admin'] },
-    { name: 'Kelola User', href: '/admin/users', icon: Users, roles: ['admin'] },
+    // User menu - Usulan kegiatan
+    { name: 'Usulan Aktivitas', href: '/activities', icon: FileText, roles: ['user'] },
+    // Verifier menu - Review aktivitas
+    { name: 'Verifikasi Aktivitas', href: '/approvals', icon: CheckSquare, roles: ['verifier'] },
+    // Admin menu - Kelola sistem
+    { name: 'Kelola Skema Penilaian', href: '/admin/schemas', icon: ClipboardList, roles: ['admin'] },
+    { name: 'Kelola User & Role', href: '/admin/users', icon: Users, roles: ['admin'] },
   ]
 
   const filteredNav = navigation.filter(item =>

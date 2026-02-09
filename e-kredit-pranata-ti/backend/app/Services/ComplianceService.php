@@ -2,6 +2,13 @@
 
 namespace App\Services;
 
+use App\DTOs\ComplianceResultDTO;
+use App\DTOs\JenjangTargetDTO;
+use App\DTOs\PromotionEligibilityDTO;
+use App\DTOs\RecommendationDTO;
+use App\Enums\ActivityStatus;
+use App\Enums\RecommendationType;
+use App\Enums\UnsurType;
 use App\Models\User;
 use App\Models\Activity;
 use App\Models\CreditSchema;
@@ -16,70 +23,181 @@ use App\Models\CreditSchema;
  */
 class ComplianceService
 {
-    // Jenjang jabatan order (from lowest to highest)
+    /**
+     * Jenjang jabatan berdasarkan PR No. 3 Tahun 2025 (Lampiran II)
+     * Target Angka Kredit Jabatan Fungsional Pranata TI
+     *
+     * Struktur:
+     * - min_credit: Angka Kredit Minimal
+     * - min_utama: Unsur Utama ≥80%
+     * - max_penunjang: Unsur Penunjang ≤20%
+     * - jabatan_terampil: Jabatan Fungsional Tingkat Terampil (II/a - III/d)
+     * - jabatan_ahli: Jabatan Fungsional Tingkat Ahli (III/a - IV/e)
+     */
     private const JENJANG_ORDER = [
-        'II/a' => ['name' => 'PK Pelaksana Pemula', 'golongan' => 'II/a', 'min_credit' => 25],
-        'II/b' => ['name' => 'PK Pelaksana', 'golongan' => 'II/b', 'min_credit' => 40],
-        'II/c' => ['name' => 'PK Pelaksana', 'golongan' => 'II/c', 'min_credit' => 60],
-        'II/d' => ['name' => 'PK Pelaksana', 'golongan' => 'II/d', 'min_credit' => 80],
-        'III/a' => ['name' => 'PK Pelaksana Lanjutan', 'golongan' => 'III/a', 'min_credit' => 100],
-        'III/b' => ['name' => 'PK Pelaksana Lanjutan', 'golongan' => 'III/b', 'min_credit' => 150],
-        'III/c' => ['name' => 'PK Pelaksana Lanjutan', 'golongan' => 'III/c', 'min_credit' => 200],
-        'III/d' => ['name' => 'PK Penyelia', 'golongan' => 'III/d', 'min_credit' => 300],
-        'IV/a' => ['name' => 'PK Pertama', 'golongan' => 'IV/a', 'min_credit' => 400],
-        'IV/b' => ['name' => 'PK Madya', 'golongan' => 'IV/b', 'min_credit' => 550],
-        'IV/c' => ['name' => 'PK Madya', 'golongan' => 'IV/c', 'min_credit' => 700],
-        'IV/d' => ['name' => 'Pranata Komputer', 'golongan' => 'IV/d', 'min_credit' => 850],
-        'IV/e' => ['name' => 'Pranata Komputer Utama', 'golongan' => 'IV/e', 'min_credit' => 1050],
+        // Tingkat Terampil Only (II/a - II/d)
+        'II/a' => [
+            'golongan' => 'II/a',
+            'min_credit' => 25,
+            'min_utama' => 20,
+            'max_penunjang' => 5,
+            'jabatan_terampil' => 'Pranata TI Pelaksana Pemula',
+            'jabatan_ahli' => null,
+        ],
+        'II/b' => [
+            'golongan' => 'II/b',
+            'min_credit' => 40,
+            'min_utama' => 32,
+            'max_penunjang' => 8,
+            'jabatan_terampil' => 'Pranata TI Pelaksana',
+            'jabatan_ahli' => null,
+        ],
+        'II/c' => [
+            'golongan' => 'II/c',
+            'min_credit' => 60,
+            'min_utama' => 48,
+            'max_penunjang' => 12,
+            'jabatan_terampil' => 'Pranata TI Pelaksana',
+            'jabatan_ahli' => null,
+        ],
+        'II/d' => [
+            'golongan' => 'II/d',
+            'min_credit' => 80,
+            'min_utama' => 64,
+            'max_penunjang' => 16,
+            'jabatan_terampil' => 'Pranata TI Pelaksana',
+            'jabatan_ahli' => null,
+        ],
+        // Tingkat Terampil & Ahli (III/a - III/d)
+        'III/a' => [
+            'golongan' => 'III/a',
+            'min_credit' => 100,
+            'min_utama' => 80,
+            'max_penunjang' => 20,
+            'jabatan_terampil' => 'Pranata TI Pelaksana Lanjutan',
+            'jabatan_ahli' => 'Pranata TI Pertama',
+        ],
+        'III/b' => [
+            'golongan' => 'III/b',
+            'min_credit' => 150,
+            'min_utama' => 120,
+            'max_penunjang' => 30,
+            'jabatan_terampil' => 'Pranata TI Pelaksana Lanjutan',
+            'jabatan_ahli' => 'Pranata TI Pertama',
+        ],
+        'III/c' => [
+            'golongan' => 'III/c',
+            'min_credit' => 200,
+            'min_utama' => 160,
+            'max_penunjang' => 40,
+            'jabatan_terampil' => 'Pranata TI Penyelia',
+            'jabatan_ahli' => 'Pranata TI Muda',
+        ],
+        'III/d' => [
+            'golongan' => 'III/d',
+            'min_credit' => 300,
+            'min_utama' => 240,
+            'max_penunjang' => 60,
+            'jabatan_terampil' => 'Pranata TI Penyelia',
+            'jabatan_ahli' => 'Pranata TI Muda',
+        ],
+        // Tingkat Ahli Only (IV/a - IV/e)
+        'IV/a' => [
+            'golongan' => 'IV/a',
+            'min_credit' => 400,
+            'min_utama' => 320,
+            'max_penunjang' => 80,
+            'jabatan_terampil' => null,
+            'jabatan_ahli' => 'Pranata TI Madya',
+        ],
+        'IV/b' => [
+            'golongan' => 'IV/b',
+            'min_credit' => 550,
+            'min_utama' => 440,
+            'max_penunjang' => 110,
+            'jabatan_terampil' => null,
+            'jabatan_ahli' => 'Pranata TI Madya',
+        ],
+        'IV/c' => [
+            'golongan' => 'IV/c',
+            'min_credit' => 700,
+            'min_utama' => 560,
+            'max_penunjang' => 140,
+            'jabatan_terampil' => null,
+            'jabatan_ahli' => 'Pranata TI Madya',
+        ],
+        'IV/d' => [
+            'golongan' => 'IV/d',
+            'min_credit' => 850,
+            'min_utama' => 680,
+            'max_penunjang' => 170,
+            'jabatan_terampil' => null,
+            'jabatan_ahli' => 'Pranata TI Utama',
+        ],
+        'IV/e' => [
+            'golongan' => 'IV/e',
+            'min_credit' => 1050,
+            'min_utama' => 840,
+            'max_penunjang' => 210,
+            'jabatan_terampil' => null,
+            'jabatan_ahli' => 'Pranata TI Utama',
+        ],
     ];
 
     /**
      * Validate compliance for given credits
      */
-    public function validateCompliance(float $creditUtama, float $creditPenunjang): array
+    public function validateCompliance(float $creditUtama, float $creditPenunjang): ComplianceResultDTO
     {
         $totalCredit = $creditUtama + $creditPenunjang;
 
         if ($totalCredit == 0) {
-            return [
-                'is_compliant' => true,
-                'percentage_utama' => 0,
-                'percentage_penunjang' => 0,
-                'message' => 'Belum ada kredit',
-            ];
+            return new ComplianceResultDTO(
+                isCompliant: true,
+                percentageUtama: 0,
+                percentagePenunjang: 0,
+                totalCredit: 0,
+                creditUtama: 0,
+                creditPenunjang: 0,
+                message: 'Belum ada kredit',
+            );
         }
 
         $percentageUtama = ($creditUtama / $totalCredit) * 100;
         $percentagePenunjang = ($creditPenunjang / $totalCredit) * 100;
 
-        $isCompliant = $percentageUtama >= 80 && $percentagePenunjang <= 20;
+        $minUtama = UnsurType::UTAMA->minPercentage();
+        $maxPenunjang = UnsurType::PENUNJANG->maxPercentage();
+        $isCompliant = $percentageUtama >= $minUtama && $percentagePenunjang <= $maxPenunjang;
 
         $message = $isCompliant
             ? 'Memenuhi aturan 80/20'
             : sprintf(
-                'Tidak memenuhi aturan! Unsur Utama: %.1f%% (min 80%%), Unsur Penunjang: %.1f%% (max 20%%)',
+                'Tidak memenuhi aturan! Unsur Utama: %.1f%% (min %.0f%%), Unsur Penunjang: %.1f%% (max %.0f%%)',
                 $percentageUtama,
-                $percentagePenunjang
+                $minUtama,
+                $percentagePenunjang,
+                $maxPenunjang
             );
 
-        return [
-            'is_compliant' => $isCompliant,
-            'percentage_utama' => round($percentageUtama, 2),
-            'percentage_penunjang' => round($percentagePenunjang, 2),
-            'total_credit' => $totalCredit,
-            'credit_utama' => $creditUtama,
-            'credit_penunjang' => $creditPenunjang,
-            'message' => $message,
-        ];
+        return new ComplianceResultDTO(
+            isCompliant: $isCompliant,
+            percentageUtama: round($percentageUtama, 2),
+            percentagePenunjang: round($percentagePenunjang, 2),
+            totalCredit: $totalCredit,
+            creditUtama: $creditUtama,
+            creditPenunjang: $creditPenunjang,
+            message: $message,
+        );
     }
 
     /**
      * Calculate user's compliance from their activities
      */
-    public function calculateUserCompliance(User $user): array
+    public function calculateUserCompliance(User $user): ComplianceResultDTO
     {
         $activities = Activity::where('user_id', $user->id)
-            ->where('status', 'approved')
+            ->where('status', ActivityStatus::APPROVED->value)
             ->with('schema')
             ->get();
 
@@ -89,7 +207,7 @@ class ComplianceService
         foreach ($activities as $activity) {
             if ($activity->creditSchema) {
                 $points = $activity->creditSchema->credit_points;
-                if ($activity->creditSchema->unsur_type === 'utama') {
+                if ($activity->creditSchema->unsur_type === UnsurType::UTAMA->value) {
                     $creditUtama += $points;
                 } else {
                     $creditPenunjang += $points;
@@ -102,35 +220,62 @@ class ComplianceService
 
     /**
      * Get target credits for a jenjang/golongan
+     * Sesuai PR No. 3 Tahun 2025 Lampiran II
+     *
+     * @param string $golongan Golongan/ruang (e.g., 'III/a')
+     * @param string|null $tingkat 'terampil' atau 'ahli' (optional, auto-detect if null)
      */
-    public function getTargetCredits(string $golongan): array
+    public function getTargetCredits(string $golongan, ?string $tingkat = null): JenjangTargetDTO
     {
         if (!isset(self::JENJANG_ORDER[$golongan])) {
-            return [
-                'golongan' => $golongan,
-                'jenjang' => 'Unknown',
-                'min_credit' => 0,
-                'min_credit_utama' => 0,
-                'max_credit_penunjang' => 0,
-            ];
+            return new JenjangTargetDTO(
+                golongan: $golongan,
+                jenjang: 'Unknown',
+                jabatanTerampil: null,
+                jabatanAhli: null,
+                minCredit: 0,
+                minCreditUtama: 0,
+                maxCreditPenunjang: 0,
+            );
         }
 
         $data = self::JENJANG_ORDER[$golongan];
-        $minCredit = $data['min_credit'];
 
-        return [
-            'golongan' => $golongan,
-            'jenjang' => $data['name'],
-            'min_credit' => $minCredit,
-            'min_credit_utama' => $minCredit * 0.8,  // 80%
-            'max_credit_penunjang' => $minCredit * 0.2,  // 20%
-        ];
+        // Determine jabatan name based on tingkat
+        $jenjang = $this->getJabatanName($data, $tingkat);
+
+        return new JenjangTargetDTO(
+            golongan: $golongan,
+            jenjang: $jenjang,
+            jabatanTerampil: $data['jabatan_terampil'],
+            jabatanAhli: $data['jabatan_ahli'],
+            minCredit: $data['min_credit'],
+            minCreditUtama: $data['min_utama'],
+            maxCreditPenunjang: $data['max_penunjang'],
+        );
+    }
+
+    /**
+     * Get jabatan name based on tingkat preference
+     */
+    private function getJabatanName(array $data, ?string $tingkat = null): string
+    {
+        // If tingkat specified, return that
+        if ($tingkat === 'terampil' && $data['jabatan_terampil']) {
+            return $data['jabatan_terampil'];
+        }
+        if ($tingkat === 'ahli' && $data['jabatan_ahli']) {
+            return $data['jabatan_ahli'];
+        }
+
+        // Auto-detect: prefer ahli if available, otherwise terampil
+        return $data['jabatan_ahli'] ?? $data['jabatan_terampil'] ?? 'Unknown';
     }
 
     /**
      * Get next jenjang/golongan
      */
-    public function getNextJenjang(string $currentGolongan): ?array
+    public function getNextJenjang(string $currentGolongan): ?JenjangTargetDTO
     {
         $golonganKeys = array_keys(self::JENJANG_ORDER);
         $currentIndex = array_search($currentGolongan, $golonganKeys);
@@ -146,13 +291,17 @@ class ComplianceService
     /**
      * Check if user can be promoted to next jenjang
      */
-    public function canPromote(User $user): array
+    public function canPromote(User $user): PromotionEligibilityDTO
     {
         if (!$user->golongan) {
-            return [
-                'can_promote' => false,
-                'reason' => 'Golongan belum diset',
-            ];
+            return new PromotionEligibilityDTO(
+                canPromote: false,
+                reason: 'Golongan belum diset',
+                currentCredit: 0,
+                requiredCredit: 0,
+                nextJenjang: null,
+                isCompliant: false,
+            );
         }
 
         $compliance = $this->calculateUserCompliance($user);
@@ -160,109 +309,125 @@ class ComplianceService
         $nextJenjang = $this->getNextJenjang($user->golongan);
 
         if (!$nextJenjang) {
-            return [
-                'can_promote' => false,
-                'reason' => 'Sudah di jenjang tertinggi',
-                'current_jenjang' => $currentTarget,
-            ];
+            return new PromotionEligibilityDTO(
+                canPromote: false,
+                reason: 'Sudah di jenjang tertinggi',
+                currentCredit: $compliance->totalCredit,
+                requiredCredit: $currentTarget->minCredit,
+                nextJenjang: null,
+                isCompliant: $compliance->isCompliant,
+                compliance: $compliance,
+                currentJenjang: $currentTarget,
+            );
         }
 
         // Check if has enough credits for current position
-        $hasEnoughCredits = ($compliance['total_credit'] ?? 0) >= $currentTarget['min_credit'];
+        $hasEnoughCredits = $compliance->totalCredit >= $currentTarget->minCredit;
 
         // Check 80/20 compliance
-        $isCompliant = $compliance['is_compliant'];
+        $isCompliant = $compliance->isCompliant;
 
         $canPromote = $hasEnoughCredits && $isCompliant;
 
-        return [
-            'can_promote' => $canPromote,
-            'current_credit' => $compliance['total_credit'] ?? 0,
-            'required_credit' => $currentTarget['min_credit'],
-            'next_jenjang' => $nextJenjang,
-            'is_compliant' => $isCompliant,
-            'compliance' => $compliance,
-            'reason' => !$hasEnoughCredits
-                ? sprintf('Perlu %.2f kredit lagi', $currentTarget['min_credit'] - ($compliance['total_credit'] ?? 0))
-                : (!$isCompliant ? 'Tidak memenuhi aturan 80/20' : 'Bisa naik jabatan'),
-        ];
+        $reason = !$hasEnoughCredits
+            ? sprintf('Perlu %.2f kredit lagi', $currentTarget->minCredit - $compliance->totalCredit)
+            : (!$isCompliant ? 'Tidak memenuhi aturan 80/20' : 'Bisa naik jabatan');
+
+        return new PromotionEligibilityDTO(
+            canPromote: $canPromote,
+            reason: $reason,
+            currentCredit: $compliance->totalCredit,
+            requiredCredit: $currentTarget->minCredit,
+            nextJenjang: $nextJenjang,
+            isCompliant: $isCompliant,
+            compliance: $compliance,
+            currentJenjang: $currentTarget,
+        );
     }
 
     /**
      * Get recommendations for user based on their position
+     * 
+     * @return array<RecommendationDTO>
      */
     public function getRecommendations(User $user): array
     {
         $compliance = $this->calculateUserCompliance($user);
         $recommendations = [];
 
+        $minUtama = UnsurType::UTAMA->minPercentage();
+        $maxPenunjang = UnsurType::PENUNJANG->maxPercentage();
+
         // Recommendation 1: Compliance
-        if (!$compliance['is_compliant'] && $compliance['total_credit'] > 0) {
-            if ($compliance['percentage_utama'] < 80) {
-                $recommendations[] = [
-                    'type' => 'warning',
-                    'category' => 'compliance',
-                    'message' => sprintf(
-                        'Unsur Utama Anda hanya %.1f%%. Tambahkan lebih banyak aktivitas Unsur Utama untuk mencapai minimal 80%%.',
-                        $compliance['percentage_utama']
+        if (!$compliance->isCompliant && $compliance->totalCredit > 0) {
+            if ($compliance->percentageUtama < $minUtama) {
+                $recommendations[] = new RecommendationDTO(
+                    type: RecommendationType::WARNING,
+                    category: 'compliance',
+                    message: sprintf(
+                        'Unsur Utama Anda hanya %.1f%%. Tambahkan lebih banyak aktivitas Unsur Utama untuk mencapai minimal %.0f%%.',
+                        $compliance->percentageUtama,
+                        $minUtama
                     ),
-                    'action' => 'Fokus pada aktivitas: Pendidikan, Operasi TI, Implementasi, Analisis Sistem',
-                ];
+                    action: 'Fokus pada aktivitas: Pendidikan, Operasi TI, Implementasi, Analisis Sistem',
+                );
             }
 
-            if ($compliance['percentage_penunjang'] > 20) {
-                $recommendations[] = [
-                    'type' => 'warning',
-                    'category' => 'compliance',
-                    'message' => sprintf(
-                        'Unsur Penunjang Anda %.1f%% (melebihi batas 20%%). Kurangi aktivitas Unsur Penunjang.',
-                        $compliance['percentage_penunjang']
+            if ($compliance->percentagePenunjang > $maxPenunjang) {
+                $recommendations[] = new RecommendationDTO(
+                    type: RecommendationType::WARNING,
+                    category: 'compliance',
+                    message: sprintf(
+                        'Unsur Penunjang Anda %.1f%% (melebihi batas %.0f%%). Kurangi aktivitas Unsur Penunjang.',
+                        $compliance->percentagePenunjang,
+                        $maxPenunjang
                     ),
-                    'action' => 'Hindari terlalu banyak aktivitas Penunjang',
-                ];
+                    action: 'Hindari terlalu banyak aktivitas Penunjang',
+                );
             }
         }
 
         // Recommendation 2: Progress toward target
         if ($user->golongan) {
             $target = $this->getTargetCredits($user->golongan);
-            $progress = ($compliance['total_credit'] / $target['min_credit']) * 100;
+            $totalCredit = $compliance->totalCredit;
+            $progress = $target->minCredit > 0 ? ($totalCredit / $target->minCredit) * 100 : 0;
 
             if ($progress < 100) {
-                $remaining = $target['min_credit'] - $compliance['total_credit'];
-                $recommendations[] = [
-                    'type' => 'info',
-                    'category' => 'progress',
-                    'message' => sprintf(
+                $remaining = $target->minCredit - $totalCredit;
+                $recommendations[] = new RecommendationDTO(
+                    type: RecommendationType::INFO,
+                    category: 'progress',
+                    message: sprintf(
                         'Progress Anda %.1f%%. Perlu %.2f kredit lagi untuk memenuhi target %s.',
                         $progress,
                         $remaining,
-                        $target['jenjang']
+                        $target->jenjang
                     ),
-                    'action' => 'Lanjutkan submit aktivitas',
-                ];
+                    action: 'Lanjutkan submit aktivitas',
+                );
             }
         }
 
         // Recommendation 3: Suggested activities
-        $topActivities = CreditSchema::where('unsur_type', 'utama')
+        $topActivities = CreditSchema::where('unsur_type', UnsurType::UTAMA->value)
             ->orderBy('credit_points', 'desc')
             ->take(5)
             ->get(['activity_name', 'category', 'credit_points']);
 
         if ($topActivities->isNotEmpty()) {
-            $recommendations[] = [
-                'type' => 'success',
-                'category' => 'suggestions',
-                'message' => 'Aktivitas dengan kredit tertinggi yang bisa Anda ambil:',
-                'activities' => $topActivities->map(function($schema) {
+            $recommendations[] = new RecommendationDTO(
+                type: RecommendationType::SUCCESS,
+                category: 'suggestions',
+                message: 'Aktivitas dengan kredit tertinggi yang bisa Anda ambil:',
+                activities: $topActivities->map(function($schema) {
                     return [
                         'name' => $schema->activity_name,
                         'category' => $schema->category,
                         'points' => $schema->credit_points,
                     ];
                 })->toArray(),
-            ];
+            );
         }
 
         return $recommendations;
@@ -270,11 +435,42 @@ class ComplianceService
 
     /**
      * Get all jenjang levels
+     * Sesuai PR No. 3 Tahun 2025 Lampiran II
      */
     public function getAllJenjang(): array
     {
         return array_map(function($golongan, $data) {
-            return array_merge(['golongan' => $golongan], $data);
+            return [
+                'golongan' => $golongan,
+                'min_credit' => $data['min_credit'],
+                'min_utama' => $data['min_utama'],
+                'max_penunjang' => $data['max_penunjang'],
+                'jabatan_terampil' => $data['jabatan_terampil'],
+                'jabatan_ahli' => $data['jabatan_ahli'],
+                // Backward compatibility - use ahli name if available
+                'jenjang' => $data['jabatan_ahli'] ?? $data['jabatan_terampil'],
+            ];
         }, array_keys(self::JENJANG_ORDER), self::JENJANG_ORDER);
+    }
+
+    /**
+     * Get jenjang by tingkat (terampil/ahli)
+     */
+    public function getJenjangByTingkat(string $tingkat): array
+    {
+        $result = [];
+        foreach (self::JENJANG_ORDER as $golongan => $data) {
+            $jabatan = $tingkat === 'terampil' ? $data['jabatan_terampil'] : $data['jabatan_ahli'];
+            if ($jabatan) {
+                $result[] = [
+                    'golongan' => $golongan,
+                    'jabatan' => $jabatan,
+                    'min_credit' => $data['min_credit'],
+                    'min_utama' => $data['min_utama'],
+                    'max_penunjang' => $data['max_penunjang'],
+                ];
+            }
+        }
+        return $result;
     }
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
@@ -77,13 +77,6 @@ export function LoginPage() {
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? 'Loading...' : 'Login'}
             </Button>
-
-            <div className="text-center text-sm text-gray-600">
-              Belum punya akun?{' '}
-              <Link to="/register" className="text-primary hover:underline font-medium">
-                Daftar di sini
-              </Link>
-            </div>
 
             <div className="pt-4 border-t">
               <p className="text-xs text-gray-500 mb-2">Test Users:</p>

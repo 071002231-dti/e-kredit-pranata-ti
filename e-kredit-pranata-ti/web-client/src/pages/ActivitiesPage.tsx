@@ -6,7 +6,7 @@ import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { activityService } from '../services/activityService'
 import type { Activity } from '../types'
-import { Plus, Search, FileText, Trash2, Eye, LayoutGrid, Table as TableIcon } from 'lucide-react'
+import { Plus, Search, FileText, Trash2, Eye, LayoutGrid, Table as TableIcon, RotateCcw, Edit } from 'lucide-react'
 import { formatDate } from '../lib/utils'
 
 type ViewMode = 'table' | 'card'
@@ -65,19 +65,22 @@ export function ActivitiesPage() {
   }
 
   const getStatusBadge = (status: string) => {
-    const styles = {
+    const styles: Record<string, string> = {
       pending: 'bg-yellow-100 text-yellow-700',
       approved: 'bg-green-100 text-green-700',
       rejected: 'bg-red-100 text-red-700',
+      revision: 'bg-orange-100 text-orange-700',
     }
-    const labels = {
+    const labels: Record<string, string> = {
       pending: 'Pending',
       approved: 'Disetujui',
       rejected: 'Ditolak',
+      revision: 'Perlu Perbaikan',
     }
     return (
-      <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${styles[status as keyof typeof styles]}`}>
-        {labels[status as keyof typeof labels]}
+      <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full ${styles[status] || 'bg-gray-100 text-gray-700'}`}>
+        {status === 'revision' && <RotateCcw className="h-3 w-3" />}
+        {labels[status] || status}
       </span>
     )
   }
@@ -115,27 +118,40 @@ export function ActivitiesPage() {
                   />
                 </div>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 <Button
                   variant={statusFilter === 'all' ? 'default' : 'outline'}
+                  size="sm"
                   onClick={() => setStatusFilter('all')}
                 >
                   Semua
                 </Button>
                 <Button
                   variant={statusFilter === 'pending' ? 'default' : 'outline'}
+                  size="sm"
                   onClick={() => setStatusFilter('pending')}
                 >
                   Pending
                 </Button>
                 <Button
+                  variant={statusFilter === 'revision' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setStatusFilter('revision')}
+                  className={statusFilter !== 'revision' ? 'border-orange-300 text-orange-600 hover:bg-orange-50' : ''}
+                >
+                  <RotateCcw className="h-3 w-3 mr-1" />
+                  Perlu Perbaikan
+                </Button>
+                <Button
                   variant={statusFilter === 'approved' ? 'default' : 'outline'}
+                  size="sm"
                   onClick={() => setStatusFilter('approved')}
                 >
                   Disetujui
                 </Button>
                 <Button
                   variant={statusFilter === 'rejected' ? 'default' : 'outline'}
+                  size="sm"
                   onClick={() => setStatusFilter('rejected')}
                 >
                   Ditolak
@@ -230,7 +246,14 @@ export function ActivitiesPage() {
                                   <Eye className="h-4 w-4" />
                                 </Button>
                               </Link>
-                              {activity.status === 'pending' && (
+                              {activity.status === 'revision' && (
+                                <Link to={`/activities/${activity.id}/edit`}>
+                                  <Button variant="ghost" size="sm" className="text-orange-600 hover:text-orange-700">
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                </Link>
+                              )}
+                              {(activity.status === 'pending' || activity.status === 'revision') && (
                                 <Button
                                   variant="ghost"
                                   size="sm"
@@ -316,7 +339,18 @@ export function ActivitiesPage() {
                             Detail
                           </Button>
                         </Link>
-                        {activity.status === 'pending' && (
+                        {activity.status === 'revision' && (
+                          <Link to={`/activities/${activity.id}/edit`}>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-orange-600 hover:text-orange-700 hover:border-orange-300"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                        )}
+                        {(activity.status === 'pending' || activity.status === 'revision') && (
                           <Button
                             variant="outline"
                             size="sm"

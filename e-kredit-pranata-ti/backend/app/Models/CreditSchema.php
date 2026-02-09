@@ -9,6 +9,7 @@ class CreditSchema extends Model
     protected $table = 'credit_schema';
 
     protected $fillable = [
+        'code',
         'category',
         'subcategory',
         'activity_name',

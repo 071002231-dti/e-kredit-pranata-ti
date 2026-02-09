@@ -94,10 +94,10 @@ class ActivityController extends Controller
             'message' => 'Activity submitted successfully',
             'activity' => $activity,
             'banking_info' => [
-                'will_be_banked' => $willBank['should_bank'],
-                'reason' => $willBank['reason'] ?? null,
-                'warning' => $willBank['should_bank']
-                    ? 'Kredit ini akan disimpan (banked) karena: ' . $willBank['reason']
+                'will_be_banked' => $willBank->shouldBank,
+                'reason' => $willBank->reason ?? null,
+                'warning' => $willBank->shouldBank
+                    ? 'Kredit ini akan disimpan (banked) karena: ' . $willBank->reason
                     : null,
             ],
         ], 201);
@@ -116,16 +116,16 @@ class ActivityController extends Controller
     }
 
     /**
-     * Update the specified activity (only if pending)
+     * Update the specified activity (only if pending or revision)
      */
     public function update(Request $request, $id)
     {
         $activity = Activity::where('user_id', $request->user()->id)
             ->findOrFail($id);
 
-        if ($activity->status !== 'pending') {
+        if (!in_array($activity->status, ['pending', 'revision'])) {
             return response()->json([
-                'message' => 'Cannot update activity that is not pending',
+                'message' => 'Cannot update activity that is not pending or needs revision',
             ], 403);
         }
 
@@ -147,25 +147,31 @@ class ActivityController extends Controller
             $validated['proof_file'] = $path;
         }
 
+        // If activity was in revision status, change back to pending for re-review
+        if ($activity->status === 'revision') {
+            $validated['status'] = 'pending';
+            $validated['submitted_at'] = now();
+        }
+
         $activity->update($validated);
 
         return response()->json([
-            'message' => 'Activity updated successfully',
+            'message' => $activity->status === 'pending' ? 'Activity resubmitted for review' : 'Activity updated successfully',
             'activity' => $activity->load('creditSchema'),
         ]);
     }
 
     /**
-     * Remove the specified activity (only if pending)
+     * Remove the specified activity (only if pending or revision)
      */
     public function destroy(Request $request, $id)
     {
         $activity = Activity::where('user_id', $request->user()->id)
             ->findOrFail($id);
 
-        if ($activity->status !== 'pending') {
+        if (!in_array($activity->status, ['pending', 'revision'])) {
             return response()->json([
-                'message' => 'Cannot delete activity that is not pending',
+                'message' => 'Cannot delete activity that is not pending or needs revision',
             ], 403);
         }
 

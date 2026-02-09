@@ -2,317 +2,329 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\CreditSchema;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
+/**
+ * CreditSchemaSeeder
+ *
+ * Seeder untuk skema kredit Pranata TI berdasarkan:
+ * PR No. 3 Tahun 2025 - Lampiran I
+ * "Rincian Kegiatan Pranata Teknologi Informasi Tingkat Ahli dan Angka Kreditnya"
+ *
+ * Struktur Kategori:
+ * UNSUR UTAMA (I-VI):
+ *   I.   PENDIDIKAN
+ *   II.  IMPLEMENTASI SISTEM INFORMASI
+ *   III. ANALISIS DAN PERANCANGAN SISTEM INFORMASI
+ *   IV.  PENYUSUNAN KEBIJAKAN SISTEM INFORMASI
+ *   V.   PENGEMBANGAN PROFESI
+ *   VI.  DAKWAH ISLAMIYAH
+ *
+ * UNSUR PENUNJANG (VII):
+ *   VII. PENUNJANG KEGIATAN
+ */
 class CreditSchemaSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        $schemas = [
-            // PENDIDIKAN
-            [
-                'category' => 'Pendidikan',
-                'subcategory' => 'Pendidikan Formal',
-                'activity_name' => 'Sarjana (S1) bidang TI',
-                'credit_points' => 100.00,
-                'description' => 'Gelar S1 di bidang Teknologi Informasi',
-            ],
-            [
-                'category' => 'Pendidikan',
-                'subcategory' => 'Pendidikan Formal',
-                'activity_name' => 'Magister (S2) bidang TI',
-                'credit_points' => 150.00,
-                'description' => 'Gelar S2 di bidang Teknologi Informasi',
-            ],
-            [
-                'category' => 'Pendidikan',
-                'subcategory' => 'Pendidikan Formal',
-                'activity_name' => 'Doktor (S3) bidang TI',
-                'credit_points' => 200.00,
-                'description' => 'Gelar S3 di bidang Teknologi Informasi',
-            ],
-            [
-                'category' => 'Pendidikan',
-                'subcategory' => 'Sertifikasi',
-                'activity_name' => 'Sertifikasi Profesional Internasional',
-                'credit_points' => 15.00,
-                'description' => 'Misal: AWS, Azure, Oracle, Cisco, ITIL',
-            ],
-            [
-                'category' => 'Pendidikan',
-                'subcategory' => 'Sertifikasi',
-                'activity_name' => 'Sertifikasi Profesional Nasional',
-                'credit_points' => 10.00,
-                'description' => 'Sertifikasi dari lembaga nasional',
-            ],
+        // Disable foreign key checks to allow truncate
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        CreditSchema::truncate();
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
-            // PELATIHAN
-            [
-                'category' => 'Pelatihan',
-                'subcategory' => 'Pelatihan Teknis',
-                'activity_name' => 'Pelatihan lebih dari 960 jam',
-                'credit_points' => 15.00,
-                'description' => 'Pelatihan teknis dengan durasi sangat lama',
-            ],
-            [
-                'category' => 'Pelatihan',
-                'subcategory' => 'Pelatihan Teknis',
-                'activity_name' => 'Pelatihan 641-960 jam',
-                'credit_points' => 12.00,
-                'description' => 'Pelatihan teknis dengan durasi sedang',
-            ],
-            [
-                'category' => 'Pelatihan',
-                'subcategory' => 'Pelatihan Teknis',
-                'activity_name' => 'Pelatihan 161-640 jam',
-                'credit_points' => 9.00,
-                'description' => 'Pelatihan teknis dengan durasi pendek',
-            ],
-            [
-                'category' => 'Pelatihan',
-                'subcategory' => 'Pelatihan Teknis',
-                'activity_name' => 'Pelatihan 81-160 jam',
-                'credit_points' => 6.00,
-                'description' => 'Pelatihan teknis dengan durasi singkat',
-            ],
-            [
-                'category' => 'Pelatihan',
-                'subcategory' => 'Pelatihan Teknis',
-                'activity_name' => 'Pelatihan 30-80 jam',
-                'credit_points' => 3.00,
-                'description' => 'Pelatihan teknis dengan durasi sangat singkat',
-            ],
-            [
-                'category' => 'Pelatihan',
-                'subcategory' => 'Pelatihan Fungsional',
-                'activity_name' => 'Pelatihan Pranata TI',
-                'credit_points' => 10.00,
-                'description' => 'Pelatihan khusus jabatan fungsional Pranata TI',
-            ],
-
-            // TUGAS POKOK DAN FUNGSI
-            [
-                'category' => 'Tugas Pokok',
-                'subcategory' => 'Analisis Sistem',
-                'activity_name' => 'Analisis Kebutuhan Sistem Besar',
-                'credit_points' => 25.00,
-                'description' => 'Analisis sistem kompleks multi-user dan multi-modul',
-            ],
-            [
-                'category' => 'Tugas Pokok',
-                'subcategory' => 'Analisis Sistem',
-                'activity_name' => 'Analisis Kebutuhan Sistem Sedang',
-                'credit_points' => 15.00,
-                'description' => 'Analisis sistem dengan kompleksitas menengah',
-            ],
-            [
-                'category' => 'Tugas Pokok',
-                'subcategory' => 'Analisis Sistem',
-                'activity_name' => 'Analisis Kebutuhan Sistem Kecil',
-                'credit_points' => 8.00,
-                'description' => 'Analisis sistem sederhana dengan user terbatas',
-            ],
-            [
-                'category' => 'Tugas Pokok',
-                'subcategory' => 'Desain Sistem',
-                'activity_name' => 'Desain Database Kompleks',
-                'credit_points' => 20.00,
-                'description' => 'Perancangan database dengan banyak tabel dan relasi',
-            ],
-            [
-                'category' => 'Tugas Pokok',
-                'subcategory' => 'Desain Sistem',
-                'activity_name' => 'Desain Database Sederhana',
-                'credit_points' => 10.00,
-                'description' => 'Perancangan database dengan tabel terbatas',
-            ],
-            [
-                'category' => 'Tugas Pokok',
-                'subcategory' => 'Desain Sistem',
-                'activity_name' => 'Desain UI/UX Aplikasi',
-                'credit_points' => 15.00,
-                'description' => 'Perancangan antarmuka dan pengalaman pengguna',
-            ],
-            [
-                'category' => 'Tugas Pokok',
-                'subcategory' => 'Implementasi',
-                'activity_name' => 'Pembuatan Aplikasi Web Kompleks',
-                'credit_points' => 30.00,
-                'description' => 'Implementasi aplikasi web dengan fitur lengkap',
-            ],
-            [
-                'category' => 'Tugas Pokok',
-                'subcategory' => 'Implementasi',
-                'activity_name' => 'Pembuatan Aplikasi Web Sederhana',
-                'credit_points' => 15.00,
-                'description' => 'Implementasi aplikasi web dengan fitur dasar',
-            ],
-            [
-                'category' => 'Tugas Pokok',
-                'subcategory' => 'Implementasi',
-                'activity_name' => 'Pembuatan Aplikasi Mobile',
-                'credit_points' => 25.00,
-                'description' => 'Implementasi aplikasi mobile (Android/iOS)',
-            ],
-            [
-                'category' => 'Tugas Pokok',
-                'subcategory' => 'Administrasi Sistem',
-                'activity_name' => 'Administrasi Server',
-                'credit_points' => 12.00,
-                'description' => 'Pengelolaan dan maintenance server',
-            ],
-            [
-                'category' => 'Tugas Pokok',
-                'subcategory' => 'Administrasi Sistem',
-                'activity_name' => 'Administrasi Jaringan',
-                'credit_points' => 12.00,
-                'description' => 'Pengelolaan infrastruktur jaringan',
-            ],
-            [
-                'category' => 'Tugas Pokok',
-                'subcategory' => 'Administrasi Sistem',
-                'activity_name' => 'Administrasi Database',
-                'credit_points' => 10.00,
-                'description' => 'Maintenance dan optimasi database',
-            ],
-            [
-                'category' => 'Tugas Pokok',
-                'subcategory' => 'Pemeliharaan Sistem',
-                'activity_name' => 'Update dan Patch Sistem',
-                'credit_points' => 8.00,
-                'description' => 'Pembaruan sistem aplikasi/infrastruktur',
-            ],
-            [
-                'category' => 'Tugas Pokok',
-                'subcategory' => 'Pemeliharaan Sistem',
-                'activity_name' => 'Troubleshooting dan Bug Fixing',
-                'credit_points' => 6.00,
-                'description' => 'Perbaikan error dan masalah sistem',
-            ],
-
-            // PENGEMBANGAN PROFESI
-            [
-                'category' => 'Pengembangan Profesi',
-                'subcategory' => 'Karya Ilmiah',
-                'activity_name' => 'Makalah Internasional',
-                'credit_points' => 25.00,
-                'description' => 'Publikasi makalah di jurnal/seminar internasional',
-            ],
-            [
-                'category' => 'Pengembangan Profesi',
-                'subcategory' => 'Karya Ilmiah',
-                'activity_name' => 'Makalah Nasional',
-                'credit_points' => 15.00,
-                'description' => 'Publikasi makalah di jurnal/seminar nasional',
-            ],
-            [
-                'category' => 'Pengembangan Profesi',
-                'subcategory' => 'Karya Ilmiah',
-                'activity_name' => 'Artikel Populer',
-                'credit_points' => 5.00,
-                'description' => 'Artikel di media massa/blog teknis',
-            ],
-            [
-                'category' => 'Pengembangan Profesi',
-                'subcategory' => 'Terjemahan',
-                'activity_name' => 'Terjemahan Buku Teknologi',
-                'credit_points' => 10.00,
-                'description' => 'Menerjemahkan buku/dokumentasi teknis',
-            ],
-            [
-                'category' => 'Pengembangan Profesi',
-                'subcategory' => 'Presentasi',
-                'activity_name' => 'Narasumber Seminar Internasional',
-                'credit_points' => 15.00,
-                'description' => 'Pembicara di seminar/workshop internasional',
-            ],
-            [
-                'category' => 'Pengembangan Profesi',
-                'subcategory' => 'Presentasi',
-                'activity_name' => 'Narasumber Seminar Nasional',
-                'credit_points' => 10.00,
-                'description' => 'Pembicara di seminar/workshop nasional',
-            ],
-            [
-                'category' => 'Pengembangan Profesi',
-                'subcategory' => 'Presentasi',
-                'activity_name' => 'Narasumber Seminar Internal',
-                'credit_points' => 5.00,
-                'description' => 'Pembicara di seminar internal instansi',
-            ],
-            [
-                'category' => 'Pengembangan Profesi',
-                'subcategory' => 'Penelitian',
-                'activity_name' => 'Penelitian Mandiri',
-                'credit_points' => 20.00,
-                'description' => 'Melakukan penelitian di bidang TI',
-            ],
-
-            // PENUNJANG TUGAS
-            [
-                'category' => 'Penunjang',
-                'subcategory' => 'Mengajar/Melatih',
-                'activity_name' => 'Mengajar di Perguruan Tinggi',
-                'credit_points' => 8.00,
-                'description' => 'Mengajar mata kuliah di universitas',
-            ],
-            [
-                'category' => 'Penunjang',
-                'subcategory' => 'Mengajar/Melatih',
-                'activity_name' => 'Instruktur Pelatihan',
-                'credit_points' => 5.00,
-                'description' => 'Menjadi instruktur di pelatihan teknis',
-            ],
-            [
-                'category' => 'Penunjang',
-                'subcategory' => 'Organisasi Profesi',
-                'activity_name' => 'Pengurus Organisasi Profesi',
-                'credit_points' => 5.00,
-                'description' => 'Menjadi pengurus di organisasi profesi TI',
-            ],
-            [
-                'category' => 'Penunjang',
-                'subcategory' => 'Organisasi Profesi',
-                'activity_name' => 'Anggota Aktif Organisasi Profesi',
-                'credit_points' => 2.00,
-                'description' => 'Keanggotaan aktif di organisasi profesi TI',
-            ],
-            [
-                'category' => 'Penunjang',
-                'subcategory' => 'Penghargaan',
-                'activity_name' => 'Penghargaan Tingkat Internasional',
-                'credit_points' => 20.00,
-                'description' => 'Penghargaan dari organisasi internasional',
-            ],
-            [
-                'category' => 'Penunjang',
-                'subcategory' => 'Penghargaan',
-                'activity_name' => 'Penghargaan Tingkat Nasional',
-                'credit_points' => 15.00,
-                'description' => 'Penghargaan dari pemerintah pusat',
-            ],
-            [
-                'category' => 'Penunjang',
-                'subcategory' => 'Penghargaan',
-                'activity_name' => 'Penghargaan Tingkat Provinsi',
-                'credit_points' => 10.00,
-                'description' => 'Penghargaan dari pemerintah provinsi',
-            ],
-            [
-                'category' => 'Penunjang',
-                'subcategory' => 'Penghargaan',
-                'activity_name' => 'Penghargaan Tingkat Instansi',
-                'credit_points' => 5.00,
-                'description' => 'Penghargaan dari instansi sendiri',
-            ],
-        ];
+        $schemas = array_merge(
+            $this->getPendidikanSchemas(),
+            $this->getImplementasiSistemInformasiSchemas(),
+            $this->getAnalisisPerancanganSchemas(),
+            $this->getPenyusunanKebijakanSchemas(),
+            $this->getPengembanganProfesiSchemas(),
+            $this->getDakwahIslamiyahSchemas(),
+            $this->getPenunjangSchemas()
+        );
 
         foreach ($schemas as $schema) {
             CreditSchema::create($schema);
         }
+
+        $this->command->info('Created ' . count($schemas) . ' credit schemas based on PR No. 3 Tahun 2025 Lampiran I');
+    }
+
+    /**
+     * I. PENDIDIKAN (Unsur Utama)
+     */
+    private function getPendidikanSchemas(): array
+    {
+        return [
+            // I.1 Pendidikan sekolah dan memperoleh gelar/ijazah
+            ['code' => 'I.1.a', 'category' => 'I. Pendidikan', 'subcategory' => 'I.1 Pendidikan Sekolah', 'activity_name' => 'Doktor', 'credit_points' => 200, 'satuan_hasil' => 'Ijazah', 'unsur_type' => 'utama', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Fotokopi ijazah yang telah disahkan'],
+            ['code' => 'I.1.b', 'category' => 'I. Pendidikan', 'subcategory' => 'I.1 Pendidikan Sekolah', 'activity_name' => 'Magister', 'credit_points' => 150, 'satuan_hasil' => 'Ijazah', 'unsur_type' => 'utama', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Fotokopi ijazah yang telah disahkan'],
+            ['code' => 'I.1.c', 'category' => 'I. Pendidikan', 'subcategory' => 'I.1 Pendidikan Sekolah', 'activity_name' => 'Sarjana/Diploma IV', 'credit_points' => 100, 'satuan_hasil' => 'Ijazah', 'unsur_type' => 'utama', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Fotokopi ijazah yang telah disahkan'],
+
+            // I.2 Pendidikan dan Pelatihan fungsional (STTPP/sertifikat)
+            ['code' => 'I.2.a', 'category' => 'I. Pendidikan', 'subcategory' => 'I.2 Pelatihan Fungsional', 'activity_name' => 'Pelatihan lebih dari 960 jam', 'credit_points' => 15, 'satuan_hasil' => 'Sertifikat', 'unsur_type' => 'utama', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Fotokopi Sertifikat'],
+            ['code' => 'I.2.b', 'category' => 'I. Pendidikan', 'subcategory' => 'I.2 Pelatihan Fungsional', 'activity_name' => 'Pelatihan antara 641-960 jam', 'credit_points' => 9, 'satuan_hasil' => 'Sertifikat', 'unsur_type' => 'utama', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Fotokopi Sertifikat'],
+            ['code' => 'I.2.c', 'category' => 'I. Pendidikan', 'subcategory' => 'I.2 Pelatihan Fungsional', 'activity_name' => 'Pelatihan antara 481-640 jam', 'credit_points' => 6, 'satuan_hasil' => 'Sertifikat', 'unsur_type' => 'utama', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Fotokopi Sertifikat'],
+            ['code' => 'I.2.d', 'category' => 'I. Pendidikan', 'subcategory' => 'I.2 Pelatihan Fungsional', 'activity_name' => 'Pelatihan antara 161-480 jam', 'credit_points' => 3, 'satuan_hasil' => 'Sertifikat', 'unsur_type' => 'utama', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Fotokopi Sertifikat'],
+            ['code' => 'I.2.e', 'category' => 'I. Pendidikan', 'subcategory' => 'I.2 Pelatihan Fungsional', 'activity_name' => 'Pelatihan antara 81-160 jam', 'credit_points' => 2, 'satuan_hasil' => 'Sertifikat', 'unsur_type' => 'utama', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Fotokopi Sertifikat'],
+            ['code' => 'I.2.f', 'category' => 'I. Pendidikan', 'subcategory' => 'I.2 Pelatihan Fungsional', 'activity_name' => 'Pelatihan antara 31-80 jam', 'credit_points' => 1, 'satuan_hasil' => 'Sertifikat', 'unsur_type' => 'utama', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Fotokopi Sertifikat'],
+            ['code' => 'I.2.g', 'category' => 'I. Pendidikan', 'subcategory' => 'I.2 Pelatihan Fungsional', 'activity_name' => 'Pelatihan antara 30-80 jam', 'credit_points' => 0.5, 'satuan_hasil' => 'Sertifikat', 'unsur_type' => 'utama', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Fotokopi Sertifikat'],
+            ['code' => 'I.2.h.1', 'category' => 'I. Pendidikan', 'subcategory' => 'I.2 Pelatihan Fungsional', 'activity_name' => 'Ujian sertifikasi tanpa kursus - Berskala Internasional', 'credit_points' => 2, 'satuan_hasil' => 'Sertifikat', 'unsur_type' => 'utama', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Fotokopi Sertifikat'],
+            ['code' => 'I.2.h.2', 'category' => 'I. Pendidikan', 'subcategory' => 'I.2 Pelatihan Fungsional', 'activity_name' => 'Ujian sertifikasi tanpa kursus - Berskala Nasional', 'credit_points' => 1, 'satuan_hasil' => 'Sertifikat', 'unsur_type' => 'utama', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Fotokopi Sertifikat'],
+            ['code' => 'I.2.h.3', 'category' => 'I. Pendidikan', 'subcategory' => 'I.2 Pelatihan Fungsional', 'activity_name' => 'Ujian sertifikasi tanpa kursus - Berskala Institusional/Lokal', 'credit_points' => 0.5, 'satuan_hasil' => 'Sertifikat', 'unsur_type' => 'utama', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Fotokopi Sertifikat'],
+        ];
+    }
+
+    /**
+     * II. IMPLEMENTASI SISTEM INFORMASI (Unsur Utama)
+     */
+    private function getImplementasiSistemInformasiSchemas(): array
+    {
+        return [
+            // II.1 Implementasi Sistem Komputer dan Program Paket
+            ['code' => 'II.1.a', 'category' => 'II. Implementasi SI', 'subcategory' => 'II.1 Sistem Komputer & Program Paket', 'activity_name' => 'Menelaah spesifikasi teknis komponen sistem komputer', 'credit_points' => 0.147, 'satuan_hasil' => 'Kali', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Dokumentasi'],
+            ['code' => 'II.1.b', 'category' => 'II. Implementasi SI', 'subcategory' => 'II.1 Sistem Komputer & Program Paket', 'activity_name' => 'Mengatur alokasi area dalam media komputer', 'credit_points' => 0.435, 'satuan_hasil' => 'Kali', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Dokumentasi'],
+            ['code' => 'II.1.c', 'category' => 'II. Implementasi SI', 'subcategory' => 'II.1 Sistem Komputer & Program Paket', 'activity_name' => 'Melakukan instalasi dan atau meningkatkan (up grade) sistem komputer', 'credit_points' => 0.435, 'satuan_hasil' => 'Kali', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Dokumentasi'],
+            ['code' => 'II.1.d.1', 'category' => 'II. Implementasi SI', 'subcategory' => 'II.1 Sistem Komputer & Program Paket', 'activity_name' => 'Membuat program paket - Untuk penggunaan internasional', 'credit_points' => 2.319, 'satuan_hasil' => 'Program', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Spesifikasi, Demo, Pedoman Pengoperasian', 'batasan_penilaian' => '25 program/tahun'],
+            ['code' => 'II.1.d.2', 'category' => 'II. Implementasi SI', 'subcategory' => 'II.1 Sistem Komputer & Program Paket', 'activity_name' => 'Membuat program paket - Untuk penggunaan nasional', 'credit_points' => 1.160, 'satuan_hasil' => 'Program', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Spesifikasi, Demo, Pedoman Pengoperasian', 'batasan_penilaian' => '25 program/tahun'],
+            ['code' => 'II.1.d.3', 'category' => 'II. Implementasi SI', 'subcategory' => 'II.1 Sistem Komputer & Program Paket', 'activity_name' => 'Membuat program paket - Untuk pengguna antar instansi/lembaga', 'credit_points' => 0.580, 'satuan_hasil' => 'Program', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Spesifikasi, Demo, Pedoman Pengoperasian', 'batasan_penilaian' => '25 program/tahun'],
+            ['code' => 'II.1.d.4', 'category' => 'II. Implementasi SI', 'subcategory' => 'II.1 Sistem Komputer & Program Paket', 'activity_name' => 'Membuat program paket - Untuk pengguna internal instansi', 'credit_points' => 0.290, 'satuan_hasil' => 'Program', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Spesifikasi, Demo, Pedoman Pengoperasian', 'batasan_penilaian' => '25 program/tahun'],
+            ['code' => 'II.1.d.5', 'category' => 'II. Implementasi SI', 'subcategory' => 'II.1 Sistem Komputer & Program Paket', 'activity_name' => 'Membuat program paket - Paket teknologi internet advanced', 'credit_points' => 0.580, 'satuan_hasil' => 'Program', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Spesifikasi, Demo, Pedoman Pengoperasian', 'batasan_penilaian' => '25 program/tahun'],
+            ['code' => 'II.1.d.6', 'category' => 'II. Implementasi SI', 'subcategory' => 'II.1 Sistem Komputer & Program Paket', 'activity_name' => 'Membuat program paket - Paket teknologi internet sederhana', 'credit_points' => 0.290, 'satuan_hasil' => 'Program', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Spesifikasi, Demo, Pedoman Pengoperasian', 'batasan_penilaian' => '25 program/tahun'],
+            ['code' => 'II.1.e', 'category' => 'II. Implementasi SI', 'subcategory' => 'II.1 Sistem Komputer & Program Paket', 'activity_name' => 'Melakukan uji coba sistem komputer', 'credit_points' => 0.38, 'satuan_hasil' => 'Sistem', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Dokumentasi', 'batasan_penilaian' => '25 sistem/tahun'],
+            ['code' => 'II.1.f.1', 'category' => 'II. Implementasi SI', 'subcategory' => 'II.1 Sistem Komputer & Program Paket', 'activity_name' => 'Melakukan uji coba program paket - Untuk penggunaan internasional', 'credit_points' => 1.241, 'satuan_hasil' => 'Program', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Laporan', 'batasan_penilaian' => '25 program/tahun'],
+            ['code' => 'II.1.f.2', 'category' => 'II. Implementasi SI', 'subcategory' => 'II.1 Sistem Komputer & Program Paket', 'activity_name' => 'Melakukan uji coba program paket - Untuk penggunaan nasional', 'credit_points' => 0.414, 'satuan_hasil' => 'Program', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Laporan', 'batasan_penilaian' => '25 program/tahun'],
+            ['code' => 'II.1.f.3', 'category' => 'II. Implementasi SI', 'subcategory' => 'II.1 Sistem Komputer & Program Paket', 'activity_name' => 'Melakukan uji coba program paket - Untuk pengguna antar instansi', 'credit_points' => 0.138, 'satuan_hasil' => 'Program', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Laporan', 'batasan_penilaian' => '25 program/tahun'],
+            ['code' => 'II.1.f.4', 'category' => 'II. Implementasi SI', 'subcategory' => 'II.1 Sistem Komputer & Program Paket', 'activity_name' => 'Melakukan uji coba program paket - Untuk pengguna internal', 'credit_points' => 0.046, 'satuan_hasil' => 'Program', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Laporan', 'batasan_penilaian' => '25 program/tahun'],
+            ['code' => 'II.1.f.5', 'category' => 'II. Implementasi SI', 'subcategory' => 'II.1 Sistem Komputer & Program Paket', 'activity_name' => 'Melakukan uji coba program paket - Paket teknologi internet advanced', 'credit_points' => 0.138, 'satuan_hasil' => 'Program', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Laporan', 'batasan_penilaian' => '25 program/tahun'],
+            ['code' => 'II.1.f.6', 'category' => 'II. Implementasi SI', 'subcategory' => 'II.1 Sistem Komputer & Program Paket', 'activity_name' => 'Melakukan uji coba program paket - Paket teknologi internet sederhana', 'credit_points' => 0.046, 'satuan_hasil' => 'Program', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Laporan', 'batasan_penilaian' => '25 program/tahun'],
+            ['code' => 'II.1.g', 'category' => 'II. Implementasi SI', 'subcategory' => 'II.1 Sistem Komputer & Program Paket', 'activity_name' => 'Melakukan deteksi dan memperbaiki kerusakan sistem komputer/program paket', 'credit_points' => 0.305, 'satuan_hasil' => 'Kali', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Dokumentasi', 'batasan_penilaian' => '25 kali/tahun'],
+            ['code' => 'II.1.h.1', 'category' => 'II. Implementasi SI', 'subcategory' => 'II.1 Sistem Komputer & Program Paket', 'activity_name' => 'Membuat petunjuk operasional sistem komputer - > 29 Halaman', 'credit_points' => 0.367, 'satuan_hasil' => 'Buku', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Buku', 'batasan_penilaian' => '25 buku/tahun'],
+            ['code' => 'II.1.h.2', 'category' => 'II. Implementasi SI', 'subcategory' => 'II.1 Sistem Komputer & Program Paket', 'activity_name' => 'Membuat petunjuk operasional sistem komputer - 20-29 Halaman', 'credit_points' => 0.246, 'satuan_hasil' => 'Buku', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Buku', 'batasan_penilaian' => '25 buku/tahun'],
+            ['code' => 'II.1.h.3', 'category' => 'II. Implementasi SI', 'subcategory' => 'II.1 Sistem Komputer & Program Paket', 'activity_name' => 'Membuat petunjuk operasional sistem komputer - 10-19 Halaman', 'credit_points' => 0.123, 'satuan_hasil' => 'Buku', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Buku', 'batasan_penilaian' => '25 buku/tahun'],
+            ['code' => 'II.1.i', 'category' => 'II. Implementasi SI', 'subcategory' => 'II.1 Sistem Komputer & Program Paket', 'activity_name' => 'Membuat dokumentasi program paket', 'credit_points' => 0.305, 'satuan_hasil' => 'Dokumen', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Dokumentasi', 'batasan_penilaian' => '25 dokumen/tahun'],
+
+            // II.2 Implementasi Basisdata
+            ['code' => 'II.2.a', 'category' => 'II. Implementasi SI', 'subcategory' => 'II.2 Implementasi Basisdata', 'activity_name' => 'Mengimplementasikan rancangan basisdata', 'credit_points' => 0.625, 'satuan_hasil' => 'Rancangan', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Dokumentasi', 'batasan_penilaian' => '25 rancangan/tahun'],
+            ['code' => 'II.2.b', 'category' => 'II. Implementasi SI', 'subcategory' => 'II.2 Implementasi Basisdata', 'activity_name' => 'Mengatur alokasi area basisdata dan media komputer', 'credit_points' => 0.347, 'satuan_hasil' => 'Kali', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Dokumentasi', 'batasan_penilaian' => '25 kali/tahun'],
+            ['code' => 'II.2.c', 'category' => 'II. Implementasi SI', 'subcategory' => 'II.2 Implementasi Basisdata', 'activity_name' => 'Membuat otorisasi akses kepada pemakai', 'credit_points' => 0.004, 'satuan_hasil' => 'Simpul', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Dokumentasi'],
+            ['code' => 'II.2.d', 'category' => 'II. Implementasi SI', 'subcategory' => 'II.2 Implementasi Basisdata', 'activity_name' => 'Memantau dan mengevaluasi penggunaan basisdata', 'credit_points' => 0.186, 'satuan_hasil' => 'Kali', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Dokumentasi', 'batasan_penilaian' => '1 kali/bulan'],
+            ['code' => 'II.2.e', 'category' => 'II. Implementasi SI', 'subcategory' => 'II.2 Implementasi Basisdata', 'activity_name' => 'Melaksanakan duplikasi basisdata', 'credit_points' => 0.155, 'satuan_hasil' => 'Kali', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Dokumentasi', 'batasan_penilaian' => '1 kali/minggu'],
+            ['code' => 'II.2.f', 'category' => 'II. Implementasi SI', 'subcategory' => 'II.2 Implementasi Basisdata', 'activity_name' => 'Melaksanakan perpindahan dari perangkat lunak lama ke baru', 'credit_points' => 0.418, 'satuan_hasil' => 'Sistem', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Dokumentasi', 'batasan_penilaian' => '12 kali/tahun'],
+            ['code' => 'II.2.g', 'category' => 'II. Implementasi SI', 'subcategory' => 'II.2 Implementasi Basisdata', 'activity_name' => 'Melakukan pencarian kembali basisdata', 'credit_points' => 0.154, 'satuan_hasil' => 'Kali', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Dokumentasi', 'batasan_penilaian' => '52 kali/tahun'],
+
+            // II.3 Implementasi Sistem Jaringan Komputer
+            ['code' => 'II.3.a', 'category' => 'II. Implementasi SI', 'subcategory' => 'II.3 Implementasi Sistem Jaringan', 'activity_name' => 'Menerapkan rancangan konfigurasi sistem jaringan komputer', 'credit_points' => 0.292, 'satuan_hasil' => 'Rancangan', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Dokumentasi'],
+            ['code' => 'II.3.b', 'category' => 'II. Implementasi SI', 'subcategory' => 'II.3 Implementasi Sistem Jaringan', 'activity_name' => 'Membuat sistem pengamanan sistem jaringan komputer', 'credit_points' => 0.223, 'satuan_hasil' => 'Sistem', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Dokumentasi'],
+            ['code' => 'II.3.c', 'category' => 'II. Implementasi SI', 'subcategory' => 'II.3 Implementasi Sistem Jaringan', 'activity_name' => 'Membuat sistem prosedur pemanfaatan sistem jaringan komputer', 'credit_points' => 0.270, 'satuan_hasil' => 'Sistem', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Dokumentasi'],
+            ['code' => 'II.3.d', 'category' => 'II. Implementasi SI', 'subcategory' => 'II.3 Implementasi Sistem Jaringan', 'activity_name' => 'Melakukan uji coba sistem operasi jaringan komputer', 'credit_points' => 0.367, 'satuan_hasil' => 'Sistem', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Dokumentasi'],
+            ['code' => 'II.3.e', 'category' => 'II. Implementasi SI', 'subcategory' => 'II.3 Implementasi Sistem Jaringan', 'activity_name' => 'Melakukan monitoring akses', 'credit_points' => 0.239, 'satuan_hasil' => 'Kali', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Dokumentasi', 'batasan_penilaian' => '12 kali/tahun'],
+            ['code' => 'II.3.f', 'category' => 'II. Implementasi SI', 'subcategory' => 'II.3 Implementasi Sistem Jaringan', 'activity_name' => 'Melakukan perbaikan kerusakan sistem jaringan', 'credit_points' => 0.189, 'satuan_hasil' => 'Kali', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Dokumentasi', 'batasan_penilaian' => '52 kali/tahun'],
+            ['code' => 'II.3.g', 'category' => 'II. Implementasi SI', 'subcategory' => 'II.3 Implementasi Sistem Jaringan', 'activity_name' => 'Melakukan sistem pencarian kembali sistem jaringan komputer', 'credit_points' => 0.187, 'satuan_hasil' => 'Kali', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Dokumentasi', 'batasan_penilaian' => '12 kali/tahun'],
+            ['code' => 'II.3.h', 'category' => 'II. Implementasi SI', 'subcategory' => 'II.3 Implementasi Sistem Jaringan', 'activity_name' => 'Membuat laporan kejanggalan (anomali) sistem jaringan komputer', 'credit_points' => 0.119, 'satuan_hasil' => 'Laporan', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Laporan', 'batasan_penilaian' => '12 laporan/tahun'],
+            ['code' => 'II.3.i', 'category' => 'II. Implementasi SI', 'subcategory' => 'II.3 Implementasi Sistem Jaringan', 'activity_name' => 'Membuat dokumentasi pengguna sistem jaringan komputer', 'credit_points' => 0.119, 'satuan_hasil' => 'Dokumen', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Buku', 'batasan_penilaian' => '1 kali/tahun'],
+
+            // II.4 Implementasi Layanan Teknologi Informasi
+            ['code' => 'II.4.a', 'category' => 'II. Implementasi SI', 'subcategory' => 'II.4 Implementasi Layanan TI', 'activity_name' => 'Implementasi akses internet', 'credit_points' => 1, 'satuan_hasil' => 'Laporan', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Laporan'],
+            ['code' => 'II.4.b', 'category' => 'II. Implementasi SI', 'subcategory' => 'II.4 Implementasi Layanan TI', 'activity_name' => 'Implementasi backend system', 'credit_points' => 1, 'satuan_hasil' => 'Laporan', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Laporan'],
+            ['code' => 'II.4.c', 'category' => 'II. Implementasi SI', 'subcategory' => 'II.4 Implementasi Layanan TI', 'activity_name' => 'Implementasi IT services', 'credit_points' => 1, 'satuan_hasil' => 'Laporan', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Laporan'],
+        ];
+    }
+
+    /**
+     * III. ANALISIS DAN PERANCANGAN SISTEM INFORMASI (Unsur Utama)
+     */
+    private function getAnalisisPerancanganSchemas(): array
+    {
+        return [
+            // III.1 Analisis Sistem dan Teknologi Informasi
+            ['code' => 'III.1.a', 'category' => 'III. Analisis & Perancangan SI', 'subcategory' => 'III.1 Analisis Sistem & TI', 'activity_name' => 'Menyusun rencana studi kelayakan pengolahan data', 'credit_points' => 0.666, 'satuan_hasil' => 'Proposal', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Muda', 'bukti_fisik' => 'Proposal'],
+            ['code' => 'III.1.b', 'category' => 'III. Analisis & Perancangan SI', 'subcategory' => 'III.1 Analisis Sistem & TI', 'activity_name' => 'Melaksanakan studi kelayakan pendahuluan pengolahan data', 'credit_points' => 0.462, 'satuan_hasil' => 'Laporan', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Muda', 'bukti_fisik' => 'Laporan', 'batasan_penilaian' => 'Min 20 hal, A4 spasi 1,5'],
+            ['code' => 'III.1.c', 'category' => 'III. Analisis & Perancangan SI', 'subcategory' => 'III.1 Analisis Sistem & TI', 'activity_name' => 'Melakukan studi kelayakan rinci pengolahan data', 'credit_points' => 1.077, 'satuan_hasil' => 'Laporan', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Muda', 'bukti_fisik' => 'Laporan', 'batasan_penilaian' => 'Min 50 hal, A4 spasi 1,5'],
+            ['code' => 'III.1.d', 'category' => 'III. Analisis & Perancangan SI', 'subcategory' => 'III.1 Analisis Sistem & TI', 'activity_name' => 'Melaksanakan analisis sistem informasi', 'credit_points' => 2.163, 'satuan_hasil' => 'Sistem', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Muda', 'bukti_fisik' => 'Sistem'],
+            ['code' => 'III.1.e', 'category' => 'III. Analisis & Perancangan SI', 'subcategory' => 'III.1 Analisis Sistem & TI', 'activity_name' => 'Merancang pengujian verifikasi/validasi analisis sistem informasi', 'credit_points' => 0.555, 'satuan_hasil' => 'Sistem', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Muda', 'bukti_fisik' => 'Sistem'],
+            ['code' => 'III.1.f', 'category' => 'III. Analisis & Perancangan SI', 'subcategory' => 'III.1 Analisis Sistem & TI', 'activity_name' => 'Mengolah dan menganalisa hasil verifikasi/validasi sistem informasi', 'credit_points' => 0.570, 'satuan_hasil' => 'Sistem', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Muda', 'bukti_fisik' => 'Sistem'],
+            ['code' => 'III.1.g', 'category' => 'III. Analisis & Perancangan SI', 'subcategory' => 'III.1 Analisis Sistem & TI', 'activity_name' => 'Memberikan pengarahan penerapan sistem informasi', 'credit_points' => 0.270, 'satuan_hasil' => 'Program', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Muda', 'bukti_fisik' => 'Program'],
+            ['code' => 'III.1.h', 'category' => 'III. Analisis & Perancangan SI', 'subcategory' => 'III.1 Analisis Sistem & TI', 'activity_name' => 'Melaksanakan pengintegrasian sistem informasi', 'credit_points' => 1.105, 'satuan_hasil' => 'Dokumen', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Muda', 'bukti_fisik' => 'Dokumentasi'],
+
+            // III.2 Perancangan Sistem Informasi
+            ['code' => 'III.2.a', 'category' => 'III. Analisis & Perancangan SI', 'subcategory' => 'III.2 Perancangan Sistem Informasi', 'activity_name' => 'Membuat rancangan sistem informasi', 'credit_points' => 0.686, 'satuan_hasil' => 'Sistem', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Muda', 'bukti_fisik' => 'Dokumentasi'],
+            ['code' => 'III.2.b', 'category' => 'III. Analisis & Perancangan SI', 'subcategory' => 'III.2 Perancangan Sistem Informasi', 'activity_name' => 'Membuat rancangan rinci sistem informasi', 'credit_points' => 1.229, 'satuan_hasil' => 'Sistem', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Muda', 'bukti_fisik' => 'Dokumentasi'],
+            ['code' => 'III.2.c', 'category' => 'III. Analisis & Perancangan SI', 'subcategory' => 'III.2 Perancangan Sistem Informasi', 'activity_name' => 'Mengembangkan/meremajakan rancangan rinci sistem informasi', 'credit_points' => 0.737, 'satuan_hasil' => 'Sistem', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Muda', 'bukti_fisik' => 'Dokumentasi'],
+            ['code' => 'III.2.d', 'category' => 'III. Analisis & Perancangan SI', 'subcategory' => 'III.2 Perancangan Sistem Informasi', 'activity_name' => 'Membuat dokumentasi rincian sistem informasi', 'credit_points' => 0.047, 'satuan_hasil' => 'Dokumen', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Muda', 'bukti_fisik' => 'Dokumentasi'],
+            ['code' => 'III.2.e', 'category' => 'III. Analisis & Perancangan SI', 'subcategory' => 'III.2 Perancangan Sistem Informasi', 'activity_name' => 'Membuat spesifikasi program', 'credit_points' => 2.515, 'satuan_hasil' => 'Program', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Muda', 'bukti_fisik' => 'Dokumentasi'],
+            ['code' => 'III.2.f', 'category' => 'III. Analisis & Perancangan SI', 'subcategory' => 'III.2 Perancangan Sistem Informasi', 'activity_name' => 'Merancang pengujian verifikasi/validasi program', 'credit_points' => 0.378, 'satuan_hasil' => 'Program', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Muda', 'bukti_fisik' => 'Dokumentasi'],
+            ['code' => 'III.2.g', 'category' => 'III. Analisis & Perancangan SI', 'subcategory' => 'III.2 Perancangan Sistem Informasi', 'activity_name' => 'Melakukan verifikasi spesifikasi program', 'credit_points' => 1.509, 'satuan_hasil' => 'Program', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Muda', 'bukti_fisik' => 'Dokumentasi'],
+            ['code' => 'III.2.h', 'category' => 'III. Analisis & Perancangan SI', 'subcategory' => 'III.2 Perancangan Sistem Informasi', 'activity_name' => 'Mengolah dan menganalisis hasil verifikasi/validasi program', 'credit_points' => 0.251, 'satuan_hasil' => 'Program', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Muda', 'bukti_fisik' => 'Dokumentasi'],
+            ['code' => 'III.2.i', 'category' => 'III. Analisis & Perancangan SI', 'subcategory' => 'III.2 Perancangan Sistem Informasi', 'activity_name' => 'Membuat algoritma pemrograman', 'credit_points' => 0.168, 'satuan_hasil' => 'Algoritma', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Muda', 'bukti_fisik' => 'Dokumentasi'],
+            ['code' => 'III.2.j', 'category' => 'III. Analisis & Perancangan SI', 'subcategory' => 'III.2 Perancangan Sistem Informasi', 'activity_name' => 'Memeriksa dokumentasi program dan petunjuk pengoperasian program', 'credit_points' => 0.339, 'satuan_hasil' => 'Dokumentasi', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Muda', 'bukti_fisik' => 'Dokumentasi', 'batasan_penilaian' => '1 dokumentasi/sistem'],
+            ['code' => 'III.2.k.1', 'category' => 'III. Analisis & Perancangan SI', 'subcategory' => 'III.2 Perancangan Sistem Informasi', 'activity_name' => 'Mengembangkan/merencanakan program paket - Untuk penggunaan internasional', 'credit_points' => 1.392, 'satuan_hasil' => 'Program', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Dokumentasi', 'batasan_penilaian' => '25 program/tahun'],
+            ['code' => 'III.2.k.2', 'category' => 'III. Analisis & Perancangan SI', 'subcategory' => 'III.2 Perancangan Sistem Informasi', 'activity_name' => 'Mengembangkan/merencanakan program paket - Untuk penggunaan nasional', 'credit_points' => 0.696, 'satuan_hasil' => 'Program', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Dokumentasi', 'batasan_penilaian' => '25 program/tahun'],
+            ['code' => 'III.2.k.3', 'category' => 'III. Analisis & Perancangan SI', 'subcategory' => 'III.2 Perancangan Sistem Informasi', 'activity_name' => 'Mengembangkan/merencanakan program paket - Untuk pengguna antar instansi', 'credit_points' => 0.348, 'satuan_hasil' => 'Program', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Dokumentasi', 'batasan_penilaian' => '25 program/tahun'],
+            ['code' => 'III.2.k.4', 'category' => 'III. Analisis & Perancangan SI', 'subcategory' => 'III.2 Perancangan Sistem Informasi', 'activity_name' => 'Mengembangkan/merencanakan program paket - Untuk pengguna internal', 'credit_points' => 0.174, 'satuan_hasil' => 'Program', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Dokumentasi', 'batasan_penilaian' => '25 program/tahun'],
+            ['code' => 'III.2.k.5', 'category' => 'III. Analisis & Perancangan SI', 'subcategory' => 'III.2 Perancangan Sistem Informasi', 'activity_name' => 'Mengembangkan/merencanakan program paket - Paket teknologi internet advanced', 'credit_points' => 0.348, 'satuan_hasil' => 'Program', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Dokumentasi', 'batasan_penilaian' => '25 program/tahun'],
+            ['code' => 'III.2.k.6', 'category' => 'III. Analisis & Perancangan SI', 'subcategory' => 'III.2 Perancangan Sistem Informasi', 'activity_name' => 'Mengembangkan/merencanakan program paket - Paket teknologi internet sederhana', 'credit_points' => 0.174, 'satuan_hasil' => 'Program', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Pertama', 'bukti_fisik' => 'Dokumentasi', 'batasan_penilaian' => '25 program/tahun'],
+
+            // III.3 Perancangan Sistem Komputer
+            ['code' => 'III.3.a', 'category' => 'III. Analisis & Perancangan SI', 'subcategory' => 'III.3 Perancangan Sistem Komputer', 'activity_name' => 'Menyusun studi kelayakan sistem komputer', 'credit_points' => 0.792, 'satuan_hasil' => 'Laporan', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Muda', 'bukti_fisik' => 'Laporan'],
+            ['code' => 'III.3.b', 'category' => 'III. Analisis & Perancangan SI', 'subcategory' => 'III.3 Perancangan Sistem Komputer', 'activity_name' => 'Membuat spesifikasi teknis sistem komputer', 'credit_points' => 0.565, 'satuan_hasil' => 'Spesifikasi', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Muda', 'bukti_fisik' => 'Spesifikasi teknis'],
+            ['code' => 'III.3.c', 'category' => 'III. Analisis & Perancangan SI', 'subcategory' => 'III.3 Perancangan Sistem Komputer', 'activity_name' => 'Merancang sistem komputer', 'credit_points' => 0.769, 'satuan_hasil' => 'Rancangan', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Muda', 'bukti_fisik' => 'Dokumentasi'],
+            ['code' => 'III.3.d', 'category' => 'III. Analisis & Perancangan SI', 'subcategory' => 'III.3 Perancangan Sistem Komputer', 'activity_name' => 'Mengoptimalkan kinerja sistem komputer', 'credit_points' => 0.244, 'satuan_hasil' => 'Laporan', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Muda', 'bukti_fisik' => 'Laporan'],
+
+            // III.4 Perancangan dan Pengembangan Basisdata
+            ['code' => 'III.4.a', 'category' => 'III. Analisis & Perancangan SI', 'subcategory' => 'III.4 Perancangan & Pengembangan Basisdata', 'activity_name' => 'Merancang sistem basisdata', 'credit_points' => 0.76, 'satuan_hasil' => 'Rancangan', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Muda', 'bukti_fisik' => 'Dokumentasi', 'batasan_penilaian' => '1 rancangan/sistem basisdata'],
+            ['code' => 'III.4.b', 'category' => 'III. Analisis & Perancangan SI', 'subcategory' => 'III.4 Perancangan & Pengembangan Basisdata', 'activity_name' => 'Melakukan instalasi program DBMS', 'credit_points' => 0.288, 'satuan_hasil' => 'Sistem', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Muda', 'bukti_fisik' => 'Dokumentasi'],
+            ['code' => 'III.4.c', 'category' => 'III. Analisis & Perancangan SI', 'subcategory' => 'III.4 Perancangan & Pengembangan Basisdata', 'activity_name' => 'Membuat prosedur pengamanan basisdata', 'credit_points' => 0.526, 'satuan_hasil' => 'Buku', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Muda', 'bukti_fisik' => 'Dokumentasi', 'batasan_penilaian' => '1 buku/basisdata'],
+            ['code' => 'III.4.d', 'category' => 'III. Analisis & Perancangan SI', 'subcategory' => 'III.4 Perancangan & Pengembangan Basisdata', 'activity_name' => 'Merancang otorisasi akses kepada pemakai', 'credit_points' => 0.764, 'satuan_hasil' => 'Rancangan', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Muda', 'bukti_fisik' => 'Dokumentasi'],
+            ['code' => 'III.4.e', 'category' => 'III. Analisis & Perancangan SI', 'subcategory' => 'III.4 Perancangan & Pengembangan Basisdata', 'activity_name' => 'Melakukan uji coba perangkat lunak baru dan memberikan saran penggunaannya', 'credit_points' => 0.801, 'satuan_hasil' => 'Program', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Muda', 'bukti_fisik' => 'Dokumentasi'],
+            ['code' => 'III.4.f', 'category' => 'III. Analisis & Perancangan SI', 'subcategory' => 'III.4 Perancangan & Pengembangan Basisdata', 'activity_name' => 'Mengembangkan sistem basisdata', 'credit_points' => 0.747, 'satuan_hasil' => 'Sistem', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Muda', 'bukti_fisik' => 'Dokumentasi'],
+            ['code' => 'III.4.g', 'category' => 'III. Analisis & Perancangan SI', 'subcategory' => 'III.4 Perancangan & Pengembangan Basisdata', 'activity_name' => 'Membuat dokumentasi rancangan basisdata', 'credit_points' => 0.376, 'satuan_hasil' => 'Dokumen', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Muda', 'bukti_fisik' => 'Dokumentasi'],
+
+            // III.5 Perancangan Sistem Jaringan Komputer
+            ['code' => 'III.5.a', 'category' => 'III. Analisis & Perancangan SI', 'subcategory' => 'III.5 Perancangan Sistem Jaringan', 'activity_name' => 'Merancang sistem jaringan komputer', 'credit_points' => 0.760, 'satuan_hasil' => 'Rancangan', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Muda', 'bukti_fisik' => 'Dokumentasi'],
+            ['code' => 'III.5.b.1', 'category' => 'III. Analisis & Perancangan SI', 'subcategory' => 'III.5 Perancangan Sistem Jaringan', 'activity_name' => 'Merancang prosedur pengamanan sistem jaringan - Diakses dari luar', 'credit_points' => 0.901, 'satuan_hasil' => 'Buku', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Muda', 'bukti_fisik' => 'Dokumentasi'],
+            ['code' => 'III.5.b.2', 'category' => 'III. Analisis & Perancangan SI', 'subcategory' => 'III.5 Perancangan Sistem Jaringan', 'activity_name' => 'Merancang prosedur pengamanan sistem jaringan - Tidak dapat diakses dari luar', 'credit_points' => 0.675, 'satuan_hasil' => 'Buku', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Muda', 'bukti_fisik' => 'Dokumentasi'],
+            ['code' => 'III.5.b.3', 'category' => 'III. Analisis & Perancangan SI', 'subcategory' => 'III.5 Perancangan Sistem Jaringan', 'activity_name' => 'Merancang prosedur pengamanan sistem jaringan - Memiliki simpul diatas 50', 'credit_points' => 0.45, 'satuan_hasil' => 'Buku', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Muda', 'bukti_fisik' => 'Dokumentasi'],
+            ['code' => 'III.5.b.4', 'category' => 'III. Analisis & Perancangan SI', 'subcategory' => 'III.5 Perancangan Sistem Jaringan', 'activity_name' => 'Merancang prosedur pengamanan sistem jaringan - Simpul 10-50', 'credit_points' => 0.225, 'satuan_hasil' => 'Buku', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Muda', 'bukti_fisik' => 'Dokumentasi'],
+            ['code' => 'III.5.c', 'category' => 'III. Analisis & Perancangan SI', 'subcategory' => 'III.5 Perancangan Sistem Jaringan', 'activity_name' => 'Merancang pengembangan sistem jaringan komputer', 'credit_points' => 0.901, 'satuan_hasil' => 'Sistem', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Muda', 'bukti_fisik' => 'Dokumentasi'],
+
+            // III.6 Perancangan Sistem Data Center
+            ['code' => 'III.6.a', 'category' => 'III. Analisis & Perancangan SI', 'subcategory' => 'III.6 Perancangan Data Center', 'activity_name' => 'Merancang kelistrikan', 'credit_points' => 0.764, 'satuan_hasil' => 'Rancangan', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Muda', 'bukti_fisik' => 'Dokumentasi'],
+            ['code' => 'III.6.b', 'category' => 'III. Analisis & Perancangan SI', 'subcategory' => 'III.6 Perancangan Data Center', 'activity_name' => 'Merancang pendinginan', 'credit_points' => 0.764, 'satuan_hasil' => 'Rancangan', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Madya', 'bukti_fisik' => 'Dokumentasi'],
+            ['code' => 'III.6.c', 'category' => 'III. Analisis & Perancangan SI', 'subcategory' => 'III.6 Perancangan Data Center', 'activity_name' => 'Merancang top of rack', 'credit_points' => 0.901, 'satuan_hasil' => 'Rancangan', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Madya', 'bukti_fisik' => 'Dokumentasi'],
+            ['code' => 'III.6.d', 'category' => 'III. Analisis & Perancangan SI', 'subcategory' => 'III.6 Perancangan Data Center', 'activity_name' => 'Merancang on premise cloud', 'credit_points' => 0.901, 'satuan_hasil' => 'Rancangan', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Madya', 'bukti_fisik' => 'Dokumentasi'],
+        ];
+    }
+
+    /**
+     * IV. PENYUSUNAN KEBIJAKAN SISTEM INFORMASI (Unsur Utama)
+     */
+    private function getPenyusunanKebijakanSchemas(): array
+    {
+        return [
+            // IV.1 Perencanaan dan Pengembangan SI
+            ['code' => 'IV.1.a', 'category' => 'IV. Penyusunan Kebijakan SI', 'subcategory' => 'IV.1 Perencanaan & Pengembangan SI', 'activity_name' => 'Melakukan diskusi dalam rangka integrasi sistem informasi keseluruhan', 'credit_points' => 0.96, 'satuan_hasil' => 'Kali', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Madya', 'bukti_fisik' => 'Dokumentasi', 'batasan_penilaian' => '25 kali/tahun'],
+            ['code' => 'IV.1.b', 'category' => 'IV. Penyusunan Kebijakan SI', 'subcategory' => 'IV.1 Perencanaan & Pengembangan SI', 'activity_name' => 'Mengidentifikasi kebutuhan pemakai dalam hal output, data, dan kinerja program', 'credit_points' => 1.891, 'satuan_hasil' => 'Dokumentasi', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Madya', 'bukti_fisik' => 'Dokumentasi', 'batasan_penilaian' => '2 dokumen/tahun'],
+            ['code' => 'IV.1.c', 'category' => 'IV. Penyusunan Kebijakan SI', 'subcategory' => 'IV.1 Perencanaan & Pengembangan SI', 'activity_name' => 'Membuat spesifikasi peralatan teknologi informasi yang diperlukan', 'credit_points' => 1.684, 'satuan_hasil' => 'Spesifikasi', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Madya', 'bukti_fisik' => 'Dokumentasi', 'batasan_penilaian' => '2 spesifikasi/tahun'],
+            ['code' => 'IV.1.d', 'category' => 'IV. Penyusunan Kebijakan SI', 'subcategory' => 'IV.1 Perencanaan & Pengembangan SI', 'activity_name' => 'Membuat rancangan informasi keseluruhan', 'credit_points' => 8.93, 'satuan_hasil' => 'Rancangan', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Madya', 'bukti_fisik' => 'Dokumentasi', 'batasan_penilaian' => '1 rancangan/tahun'],
+            ['code' => 'IV.1.e', 'category' => 'IV. Penyusunan Kebijakan SI', 'subcategory' => 'IV.1 Perencanaan & Pengembangan SI', 'activity_name' => 'Meneliti dan mengusulkan metode pengembangan SI yang meningkatkan produktifitas kerja', 'credit_points' => 3.574, 'satuan_hasil' => 'Proposal', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Madya', 'bukti_fisik' => 'Proposal', 'batasan_penilaian' => '1 proposal/tahun'],
+            ['code' => 'IV.1.f', 'category' => 'IV. Penyusunan Kebijakan SI', 'subcategory' => 'IV.1 Perencanaan & Pengembangan SI', 'activity_name' => 'Mengembangkan dan atau meremajakan rancangan sistem informasi keseluruhan', 'credit_points' => 2.963, 'satuan_hasil' => 'Rancangan', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Madya', 'bukti_fisik' => 'Dokumentasi', 'batasan_penilaian' => '1 rancangan/tahun'],
+            ['code' => 'IV.1.g', 'category' => 'IV. Penyusunan Kebijakan SI', 'subcategory' => 'IV.1 Perencanaan & Pengembangan SI', 'activity_name' => 'Memantau kinerja sistem informasi baru di lingkungan instansi', 'credit_points' => 2.862, 'satuan_hasil' => 'Dokumen', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Madya', 'bukti_fisik' => 'Dokumentasi', 'batasan_penilaian' => '2 kali/tahun'],
+            ['code' => 'IV.1.h', 'category' => 'IV. Penyusunan Kebijakan SI', 'subcategory' => 'IV.1 Perencanaan & Pengembangan SI', 'activity_name' => 'Memantau dan menilai kinerja sistem komputer yang telah dikembangkan', 'credit_points' => 2.63, 'satuan_hasil' => 'Laporan', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Madya', 'bukti_fisik' => 'Dokumentasi', 'batasan_penilaian' => '2 laporan/tahun'],
+            ['code' => 'IV.1.i', 'category' => 'IV. Penyusunan Kebijakan SI', 'subcategory' => 'IV.1 Perencanaan & Pengembangan SI', 'activity_name' => 'Menentukan penggunaan sistem komputer dan sistem jaringan untuk meningkatkan produktivitas', 'credit_points' => 1.891, 'satuan_hasil' => 'Laporan', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Madya', 'bukti_fisik' => 'Dokumentasi'],
+            ['code' => 'IV.1.j', 'category' => 'IV. Penyusunan Kebijakan SI', 'subcategory' => 'IV.1 Perencanaan & Pengembangan SI', 'activity_name' => 'Membuat rancangan pembakuan dokumentasi sistem informasi dan atau program', 'credit_points' => 7.407, 'satuan_hasil' => 'Rancangan', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Madya', 'bukti_fisik' => 'Rancangan Pedoman', 'batasan_penilaian' => '1 rancangan/tahun'],
+            ['code' => 'IV.1.k', 'category' => 'IV. Penyusunan Kebijakan SI', 'subcategory' => 'IV.1 Perencanaan & Pengembangan SI', 'activity_name' => 'Menyusun konsep program pendidikan dan pelatihan di bidang teknologi informasi', 'credit_points' => 4.938, 'satuan_hasil' => 'Proposal', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Madya', 'bukti_fisik' => 'Dokumentasi', 'batasan_penilaian' => '1 proposal/tahun'],
+            ['code' => 'IV.1.l', 'category' => 'IV. Penyusunan Kebijakan SI', 'subcategory' => 'IV.1 Perencanaan & Pengembangan SI', 'activity_name' => 'Mengusulkan alokasi sumberdaya teknologi informasi bagi unit-unit kerja', 'credit_points' => 1.753, 'satuan_hasil' => 'Proposal', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Madya', 'bukti_fisik' => 'Dokumentasi'],
+
+            // IV.2 Perencanaan Kebijakan TI
+            ['code' => 'IV.2.a', 'category' => 'IV. Penyusunan Kebijakan SI', 'subcategory' => 'IV.2 Perencanaan Kebijakan TI', 'activity_name' => 'Merancang kebijakan teknologi informasi', 'credit_points' => 10.000, 'satuan_hasil' => 'Rancangan', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Utama', 'bukti_fisik' => 'Dokumentasi'],
+
+            // IV.3 Perencanaan Layanan TI
+            ['code' => 'IV.3.a', 'category' => 'IV. Penyusunan Kebijakan SI', 'subcategory' => 'IV.3 Perencanaan Layanan TI', 'activity_name' => 'Merancang layanan teknologi informasi', 'credit_points' => 10.000, 'satuan_hasil' => 'Rancangan', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Utama', 'bukti_fisik' => 'Dokumentasi'],
+
+            // IV.4 Perumusan Visi, Misi, dan Strategi SI
+            ['code' => 'IV.4.a', 'category' => 'IV. Penyusunan Kebijakan SI', 'subcategory' => 'IV.4 Perumusan Visi, Misi, Strategi SI', 'activity_name' => 'Melaksanakan studi lengkap terhadap organisasi dalam rangka menentukan kebutuhan organisasi terhadap informasi', 'credit_points' => 13.003, 'satuan_hasil' => 'Laporan', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Utama', 'bukti_fisik' => 'Dokumentasi', 'batasan_penilaian' => '1 laporan per 3 tahun per instansi'],
+            ['code' => 'IV.4.b', 'category' => 'IV. Penyusunan Kebijakan SI', 'subcategory' => 'IV.4 Perumusan Visi, Misi, Strategi SI', 'activity_name' => 'Menyusun rencana induk sistem informasi keseluruhan/master plan', 'credit_points' => 11.483, 'satuan_hasil' => 'Dokumen', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Utama', 'bukti_fisik' => 'Dokumentasi', 'batasan_penilaian' => '1 dokumen per 3 tahun per instansi'],
+            ['code' => 'IV.4.c', 'category' => 'IV. Penyusunan Kebijakan SI', 'subcategory' => 'IV.4 Perumusan Visi, Misi, Strategi SI', 'activity_name' => 'Merintis revitalisasi rencana integrasi sistem informasi sesuai dengan kemajuan teknologi/organisasi', 'credit_points' => 7.483, 'satuan_hasil' => 'Dokumen', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Utama', 'bukti_fisik' => 'Dokumentasi', 'batasan_penilaian' => '1 dokumen per 3 tahun per instansi'],
+            ['code' => 'IV.4.d', 'category' => 'IV. Penyusunan Kebijakan SI', 'subcategory' => 'IV.4 Perumusan Visi, Misi, Strategi SI', 'activity_name' => 'Merumuskan rencana integrasi sistem informasi keseluruhan', 'credit_points' => 1.35, 'satuan_hasil' => 'Dokumen', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Utama', 'bukti_fisik' => 'Dokumentasi', 'batasan_penilaian' => '4 dokumen per tahun per instansi'],
+            ['code' => 'IV.4.e', 'category' => 'IV. Penyusunan Kebijakan SI', 'subcategory' => 'IV.4 Perumusan Visi, Misi, Strategi SI', 'activity_name' => 'Melakukan evaluasi sistem informasi induk yang sedang berjalan', 'credit_points' => 4.473, 'satuan_hasil' => 'Dokumen', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Utama', 'bukti_fisik' => 'Dokumentasi', 'batasan_penilaian' => '1 dokumen per tahun per instansi'],
+            ['code' => 'IV.4.f', 'category' => 'IV. Penyusunan Kebijakan SI', 'subcategory' => 'IV.4 Perumusan Visi, Misi, Strategi SI', 'activity_name' => 'Menyusun dan merumuskan rencana seminar di bidang teknologi informasi', 'credit_points' => 4.517, 'satuan_hasil' => 'Dokumen', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Utama', 'bukti_fisik' => 'Dokumentasi', 'batasan_penilaian' => '1 dokumen per tahun per instansi'],
+            ['code' => 'IV.4.g', 'category' => 'IV. Penyusunan Kebijakan SI', 'subcategory' => 'IV.4 Perumusan Visi, Misi, Strategi SI', 'activity_name' => 'Melakukan kajian terhadap perkembangan dan pemanfaatan teknologi informasi', 'credit_points' => 6.414, 'satuan_hasil' => 'Laporan', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Utama', 'bukti_fisik' => 'Dokumentasi', 'batasan_penilaian' => '1 laporan per tahun'],
+            ['code' => 'IV.4.h', 'category' => 'IV. Penyusunan Kebijakan SI', 'subcategory' => 'IV.4 Perumusan Visi, Misi, Strategi SI', 'activity_name' => 'Menilai usulan pengembangan SI atau pembangunan SI baru, dan mengidentifikasi dampak usulan terhadap SI yang ada', 'credit_points' => 3.065, 'satuan_hasil' => 'Kali', 'unsur_type' => 'utama', 'pelaksana' => 'PTI Utama', 'bukti_fisik' => 'Dokumentasi', 'batasan_penilaian' => '12 kali/tahun'],
+        ];
+    }
+
+    /**
+     * V. PENGEMBANGAN PROFESI (Unsur Utama)
+     */
+    private function getPengembanganProfesiSchemas(): array
+    {
+        return [
+            // V.1 Membuat karya tulis/karya ilmiah
+            ['code' => 'V.1.a.1', 'category' => 'V. Pengembangan Profesi', 'subcategory' => 'V.1 Karya Tulis/Karya Ilmiah', 'activity_name' => 'Karya tulis/karya ilmiah hasil penelitian yang dipublikasikan - Dalam bentuk buku nasional/internasional', 'credit_points' => 12.5, 'satuan_hasil' => 'Buku', 'unsur_type' => 'utama', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Naskah & buku yang diterbitkan'],
+            ['code' => 'V.1.a.2', 'category' => 'V. Pengembangan Profesi', 'subcategory' => 'V.1 Karya Tulis/Karya Ilmiah', 'activity_name' => 'Karya tulis/karya ilmiah hasil penelitian yang dipublikasikan - Dalam majalah ilmiah yang diakui oleh LIPI', 'credit_points' => 6, 'satuan_hasil' => 'Naskah', 'unsur_type' => 'utama', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Naskah artikel & artikel di majalah'],
+            ['code' => 'V.1.b.1', 'category' => 'V. Pengembangan Profesi', 'subcategory' => 'V.1 Karya Tulis/Karya Ilmiah', 'activity_name' => 'Karya tulis/karya ilmiah tidak dipublikasikan tetapi didokumentasikan - Dalam bentuk buku', 'credit_points' => 8, 'satuan_hasil' => 'Buku', 'unsur_type' => 'utama', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Buku'],
+            ['code' => 'V.1.b.2', 'category' => 'V. Pengembangan Profesi', 'subcategory' => 'V.1 Karya Tulis/Karya Ilmiah', 'activity_name' => 'Karya tulis/karya ilmiah tidak dipublikasikan tetapi didokumentasikan - Dalam bentuk makalah', 'credit_points' => 4, 'satuan_hasil' => 'Makalah', 'unsur_type' => 'utama', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Fotokopi makalah'],
+            ['code' => 'V.1.c.1', 'category' => 'V. Pengembangan Profesi', 'subcategory' => 'V.1 Karya Tulis/Karya Ilmiah', 'activity_name' => 'Karya tulis/karya ilmiah berupa tinjauan/ulasan ilmiah yang dipublikasikan - Dalam bentuk buku nasional', 'credit_points' => 8, 'satuan_hasil' => 'Buku', 'unsur_type' => 'utama', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Naskah & buku yang diterbitkan'],
+            ['code' => 'V.1.c.2', 'category' => 'V. Pengembangan Profesi', 'subcategory' => 'V.1 Karya Tulis/Karya Ilmiah', 'activity_name' => 'Karya tulis/karya ilmiah berupa tinjauan/ulasan ilmiah yang dipublikasikan - Dalam majalah ilmiah yang diakui oleh LIPI', 'credit_points' => 4, 'satuan_hasil' => 'Artikel', 'unsur_type' => 'utama', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Artikel & majalah'],
+            ['code' => 'V.1.d.1', 'category' => 'V. Pengembangan Profesi', 'subcategory' => 'V.1 Karya Tulis/Karya Ilmiah', 'activity_name' => 'Karya tulis/karya ilmiah hasil gagasan sendiri yang tidak dipublikasikan - Dalam bentuk buku', 'credit_points' => 7, 'satuan_hasil' => 'Buku', 'unsur_type' => 'utama', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Buku dan silabus atau daftar pustaka'],
+            ['code' => 'V.1.d.2', 'category' => 'V. Pengembangan Profesi', 'subcategory' => 'V.1 Karya Tulis/Karya Ilmiah', 'activity_name' => 'Karya tulis/karya ilmiah hasil gagasan sendiri yang tidak dipublikasikan - Dalam bentuk makalah', 'credit_points' => 3.5, 'satuan_hasil' => 'Makalah', 'unsur_type' => 'utama', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Makalah dan silabus atau daftar pustaka'],
+            ['code' => 'V.1.e', 'category' => 'V. Pengembangan Profesi', 'subcategory' => 'V.1 Karya Tulis/Karya Ilmiah', 'activity_name' => 'Karya tulis/karya ilmiah populer di bidang TI yang disebarluaskan melalui media massa', 'credit_points' => 2.5, 'satuan_hasil' => 'Naskah', 'unsur_type' => 'utama', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Naskah karya tulis dan media cetak'],
+            ['code' => 'V.1.f', 'category' => 'V. Pengembangan Profesi', 'subcategory' => 'V.1 Karya Tulis/Karya Ilmiah', 'activity_name' => 'Karya tulis/karya ilmiah yang disampaikan dalam pertemuan ilmiah, diklat, dan sejenisnya', 'credit_points' => 2.5, 'satuan_hasil' => 'Naskah', 'unsur_type' => 'utama', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Naskah makalah'],
+
+            // V.2 Menyusun pedoman/petunjuk teknis
+            ['code' => 'V.2.a', 'category' => 'V. Pengembangan Profesi', 'subcategory' => 'V.2 Pedoman/Petunjuk Teknis', 'activity_name' => 'Menyusun pedoman/petunjuk teknis pelaksanaan pengelolaan kegiatan teknologi informasi', 'credit_points' => 3, 'satuan_hasil' => 'Naskah atau buku', 'unsur_type' => 'utama', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Naskah atau buku'],
+
+            // V.3 Menerjemahkan/menyadur
+            ['code' => 'V.3.a.1', 'category' => 'V. Pengembangan Profesi', 'subcategory' => 'V.3 Terjemahan/Saduran', 'activity_name' => 'Terjemahan/saduran di bidang TI yang dipublikasikan - Dalam bentuk buku nasional/internasional', 'credit_points' => 7, 'satuan_hasil' => 'Buku', 'unsur_type' => 'utama', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Buku'],
+            ['code' => 'V.3.a.2', 'category' => 'V. Pengembangan Profesi', 'subcategory' => 'V.3 Terjemahan/Saduran', 'activity_name' => 'Terjemahan/saduran di bidang TI yang dipublikasikan - Dalam bentuk makalah yang diakui oleh instansi yang berwenang', 'credit_points' => 3.5, 'satuan_hasil' => 'Makalah', 'unsur_type' => 'utama', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Naskah'],
+            ['code' => 'V.3.b.1', 'category' => 'V. Pengembangan Profesi', 'subcategory' => 'V.3 Terjemahan/Saduran', 'activity_name' => 'Terjemahan/saduran di bidang TI yang tidak dipublikasikan - Dalam bentuk buku', 'credit_points' => 3.5, 'satuan_hasil' => 'Buku', 'unsur_type' => 'utama', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Buku'],
+            ['code' => 'V.3.b.2', 'category' => 'V. Pengembangan Profesi', 'subcategory' => 'V.3 Terjemahan/Saduran', 'activity_name' => 'Terjemahan/saduran di bidang TI yang tidak dipublikasikan - Dalam bentuk makalah', 'credit_points' => 1.5, 'satuan_hasil' => 'Makalah', 'unsur_type' => 'utama', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Makalah terjemahan/Saduran'],
+            ['code' => 'V.3.c', 'category' => 'V. Pengembangan Profesi', 'subcategory' => 'V.3 Terjemahan/Saduran', 'activity_name' => 'Abstrak tulisan ilmiah yang dimuat dalam majalah ilmiah', 'credit_points' => 1, 'satuan_hasil' => 'Naskah', 'unsur_type' => 'utama', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Naskah abstrak'],
+        ];
+    }
+
+    /**
+     * VI. DAKWAH ISLAMIYAH (Unsur Utama)
+     */
+    private function getDakwahIslamiyahSchemas(): array
+    {
+        return [
+            // VI.1 Dakwah Bil Hal
+            ['code' => 'VI.1.a', 'category' => 'VI. Dakwah Islamiyah', 'subcategory' => 'VI.1 Dakwah Bil Hal (Amal Nyata)', 'activity_name' => 'Sebagai pengurus takmir masjid', 'credit_points' => 0.5, 'satuan_hasil' => 'Kegiatan', 'unsur_type' => 'utama', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Surat Keterangan'],
+            ['code' => 'VI.1.b', 'category' => 'VI. Dakwah Islamiyah', 'subcategory' => 'VI.1 Dakwah Bil Hal (Amal Nyata)', 'activity_name' => 'Menjadi panitia pembangunan masjid', 'credit_points' => 0.5, 'satuan_hasil' => 'Kegiatan', 'unsur_type' => 'utama', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Surat Keterangan'],
+            ['code' => 'VI.1.c', 'category' => 'VI. Dakwah Islamiyah', 'subcategory' => 'VI.1 Dakwah Bil Hal (Amal Nyata)', 'activity_name' => 'Melaksanakan kegiatan Pembinaan agama/dakwah di masyarakat', 'credit_points' => 0.5, 'satuan_hasil' => 'Kegiatan', 'unsur_type' => 'utama', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Materi dan bukti kegiatan telah dilaksanakan'],
+            ['code' => 'VI.1.d', 'category' => 'VI. Dakwah Islamiyah', 'subcategory' => 'VI.1 Dakwah Bil Hal (Amal Nyata)', 'activity_name' => 'Melaksanakan kegiatan yang setara dengan kegiatan zakat, infaq dan sodaqoh', 'credit_points' => 0.5, 'satuan_hasil' => 'Kegiatan', 'unsur_type' => 'utama', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Surat Keterangan atau materi & bukti bahwa kegiatan telah dilaksanakan'],
+
+            // VI.2 Dakwah Bil Lisan
+            ['code' => 'VI.2.a.1.a', 'category' => 'VI. Dakwah Islamiyah', 'subcategory' => 'VI.2 Dakwah Bil Lisan (Ceramah)', 'activity_name' => 'Terjadwal/terprogram - Dalam 1 semester - Tingkat Internasional', 'credit_points' => 0.80, 'satuan_hasil' => 'Kegiatan', 'unsur_type' => 'utama', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Jadual, surat permintaan, surat tugas, bukti telah terlaksana'],
+            ['code' => 'VI.2.a.1.b', 'category' => 'VI. Dakwah Islamiyah', 'subcategory' => 'VI.2 Dakwah Bil Lisan (Ceramah)', 'activity_name' => 'Terjadwal/terprogram - Dalam 1 semester - Tingkat Nasional', 'credit_points' => 0.60, 'satuan_hasil' => 'Kegiatan', 'unsur_type' => 'utama', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Jadual, surat permintaan, surat tugas, bukti telah terlaksana'],
+            ['code' => 'VI.2.a.1.c', 'category' => 'VI. Dakwah Islamiyah', 'subcategory' => 'VI.2 Dakwah Bil Lisan (Ceramah)', 'activity_name' => 'Terjadwal/terprogram - Dalam 1 semester - Tingkat lokal', 'credit_points' => 0.40, 'satuan_hasil' => 'Kegiatan', 'unsur_type' => 'utama', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Jadual, surat permintaan, surat tugas, bukti telah terlaksana'],
+            ['code' => 'VI.2.a.2.a', 'category' => 'VI. Dakwah Islamiyah', 'subcategory' => 'VI.2 Dakwah Bil Lisan (Ceramah)', 'activity_name' => 'Terjadwal/terprogram - Kurang dari 1 semester dan minimal 1 bulan - Tingkat Internasional', 'credit_points' => 0.60, 'satuan_hasil' => 'Kegiatan', 'unsur_type' => 'utama', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Surat permintaan, surat tugas, bukti telah terlaksana'],
+            ['code' => 'VI.2.a.2.b', 'category' => 'VI. Dakwah Islamiyah', 'subcategory' => 'VI.2 Dakwah Bil Lisan (Ceramah)', 'activity_name' => 'Terjadwal/terprogram - Kurang dari 1 semester dan minimal 1 bulan - Tingkat Nasional', 'credit_points' => 0.40, 'satuan_hasil' => 'Kegiatan', 'unsur_type' => 'utama', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Surat permintaan, surat tugas, bukti telah terlaksana'],
+            ['code' => 'VI.2.a.2.c', 'category' => 'VI. Dakwah Islamiyah', 'subcategory' => 'VI.2 Dakwah Bil Lisan (Ceramah)', 'activity_name' => 'Terjadwal/terprogram - Kurang dari 1 semester dan minimal 1 bulan - Tingkat lokal', 'credit_points' => 0.20, 'satuan_hasil' => 'Kegiatan', 'unsur_type' => 'utama', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Surat permintaan, surat tugas, bukti telah terlaksana'],
+            ['code' => 'VI.2.b', 'category' => 'VI. Dakwah Islamiyah', 'subcategory' => 'VI.2 Dakwah Bil Lisan (Ceramah)', 'activity_name' => 'Insidentil, tiap program/kegiatan', 'credit_points' => 0.20, 'satuan_hasil' => 'Kegiatan', 'unsur_type' => 'utama', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Surat permintaan, surat tugas, bukti telah terlaksana'],
+
+            // VI.3 Dakwah Bil Kitabah
+            ['code' => 'VI.3.a', 'category' => 'VI. Dakwah Islamiyah', 'subcategory' => 'VI.3 Dakwah Bil Kitabah (Karya Tulis)', 'activity_name' => 'Membuat/menulis karya tulis ke-Islam-an yang dipublikasikan - Koran', 'credit_points' => 0.45, 'satuan_hasil' => 'Naskah', 'unsur_type' => 'utama', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Artikel di koran'],
+            ['code' => 'VI.3.b', 'category' => 'VI. Dakwah Islamiyah', 'subcategory' => 'VI.3 Dakwah Bil Kitabah (Karya Tulis)', 'activity_name' => 'Membuat/menulis karya tulis ke-Islam-an yang dipublikasikan - Majalah ber-ISSN', 'credit_points' => 0.9, 'satuan_hasil' => 'Naskah', 'unsur_type' => 'utama', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Artikel di majalah'],
+            ['code' => 'VI.3.c', 'category' => 'VI. Dakwah Islamiyah', 'subcategory' => 'VI.3 Dakwah Bil Kitabah (Karya Tulis)', 'activity_name' => 'Membuat/menulis karya tulis ke-Islam-an yang dipublikasikan - Buletin ke-Islam-an ber-ISSN', 'credit_points' => 0.45, 'satuan_hasil' => 'Naskah', 'unsur_type' => 'utama', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Artikel di buletin'],
+        ];
+    }
+
+    /**
+     * VII. PENUNJANG KEGIATAN (Unsur Penunjang)
+     */
+    private function getPenunjangSchemas(): array
+    {
+        return [
+            // VII.1 Mengajar/Melatih
+            ['code' => 'VII.1.a', 'category' => 'VII. Penunjang Kegiatan', 'subcategory' => 'VII.1 Mengajar/Melatih', 'activity_name' => 'Mengajar/melatih bidang teknologi informasi pada unit atau lembaga lain', 'credit_points' => 0.030, 'satuan_hasil' => '2 Jam tatap muka', 'unsur_type' => 'penunjang', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Surat tugas atau keterangan'],
+
+            // VII.2 Seminar/Lokakarya
+            ['code' => 'VII.2.a', 'category' => 'VII. Penunjang Kegiatan', 'subcategory' => 'VII.2 Seminar/Lokakarya', 'activity_name' => 'Mengikuti seminar/lokakarya - Tingkat Nasional/Internasional sebagai Pemrasaran', 'credit_points' => 3, 'satuan_hasil' => 'Kali', 'unsur_type' => 'penunjang', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Sertifikat', 'batasan_penilaian' => 'Max 2 kali/tahun'],
+            ['code' => 'VII.2.b', 'category' => 'VII. Penunjang Kegiatan', 'subcategory' => 'VII.2 Seminar/Lokakarya', 'activity_name' => 'Mengikuti seminar/lokakarya - Tingkat Nasional/Internasional sebagai Moderator/pembahas/nara sumber', 'credit_points' => 2, 'satuan_hasil' => 'Kali', 'unsur_type' => 'penunjang', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Sertifikat', 'batasan_penilaian' => 'Max 2 kali/tahun'],
+            ['code' => 'VII.2.c', 'category' => 'VII. Penunjang Kegiatan', 'subcategory' => 'VII.2 Seminar/Lokakarya', 'activity_name' => 'Mengikuti seminar/lokakarya - Tingkat Nasional/Internasional sebagai Peserta', 'credit_points' => 1, 'satuan_hasil' => 'Kali', 'unsur_type' => 'penunjang', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Sertifikat', 'batasan_penilaian' => 'Max 2 kali/tahun'],
+
+            // VII.3 Tim Penilai
+            ['code' => 'VII.3.a', 'category' => 'VII. Penunjang Kegiatan', 'subcategory' => 'VII.3 Tim Penilai', 'activity_name' => 'Menjadi anggota tim penilai jabatan pranata teknologi informasi', 'credit_points' => 0.5, 'satuan_hasil' => 'Tahun', 'unsur_type' => 'penunjang', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Surat keputusan dan surat keterangan', 'batasan_penilaian' => 'Per tahun masa keanggotaan'],
+
+            // VII.4 Organisasi Profesi
+            ['code' => 'VII.4.a.1', 'category' => 'VII. Penunjang Kegiatan', 'subcategory' => 'VII.4 Organisasi Profesi', 'activity_name' => 'Menjadi anggota organisasi profesi TI - Tingkat Nasional/Internasional sebagai Pengurus aktif', 'credit_points' => 1, 'satuan_hasil' => 'Tahun', 'unsur_type' => 'penunjang', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Surat keterangan kepengurusan/keanggotaan', 'batasan_penilaian' => 'Per tahun masa keanggotaan'],
+            ['code' => 'VII.4.a.2', 'category' => 'VII. Penunjang Kegiatan', 'subcategory' => 'VII.4 Organisasi Profesi', 'activity_name' => 'Menjadi anggota organisasi profesi TI - Tingkat Nasional/Internasional sebagai Anggota aktif', 'credit_points' => 0.5, 'satuan_hasil' => 'Tahun', 'unsur_type' => 'penunjang', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Surat keterangan kepengurusan/keanggotaan', 'batasan_penilaian' => 'Per tahun masa keanggotaan'],
+            ['code' => 'VII.4.b.1', 'category' => 'VII. Penunjang Kegiatan', 'subcategory' => 'VII.4 Organisasi Profesi', 'activity_name' => 'Menjadi anggota organisasi profesi TI - Tingkat Propinsi/Kabupaten/Kota sebagai Pengurus aktif', 'credit_points' => 0.5, 'satuan_hasil' => 'Tahun', 'unsur_type' => 'penunjang', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Surat keterangan kepengurusan/keanggotaan', 'batasan_penilaian' => 'Per tahun masa keanggotaan'],
+            ['code' => 'VII.4.b.2', 'category' => 'VII. Penunjang Kegiatan', 'subcategory' => 'VII.4 Organisasi Profesi', 'activity_name' => 'Menjadi anggota organisasi profesi TI - Tingkat Propinsi/Kabupaten/Kota sebagai Anggota aktif', 'credit_points' => 0.35, 'satuan_hasil' => 'Tahun', 'unsur_type' => 'penunjang', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Surat keterangan kepengurusan/keanggotaan', 'batasan_penilaian' => 'Per tahun masa keanggotaan'],
+
+            // VII.5 Penghargaan/Tanda Jasa
+            ['code' => 'VII.5.a.1', 'category' => 'VII. Penunjang Kegiatan', 'subcategory' => 'VII.5 Penghargaan/Tanda Jasa', 'activity_name' => 'Tanda kehormatan Satyalencana Karya Satya - 30 (tiga puluh) tahun', 'credit_points' => 3, 'satuan_hasil' => 'Tanda jasa', 'unsur_type' => 'penunjang', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'SK atau surat keterangan'],
+            ['code' => 'VII.5.a.2', 'category' => 'VII. Penunjang Kegiatan', 'subcategory' => 'VII.5 Penghargaan/Tanda Jasa', 'activity_name' => 'Tanda kehormatan Satyalencana Karya Satya - 20 (dua puluh) tahun', 'credit_points' => 2, 'satuan_hasil' => 'Tanda jasa', 'unsur_type' => 'penunjang', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'SK atau surat keterangan'],
+            ['code' => 'VII.5.a.3', 'category' => 'VII. Penunjang Kegiatan', 'subcategory' => 'VII.5 Penghargaan/Tanda Jasa', 'activity_name' => 'Tanda kehormatan Satyalencana Karya Satya - 10 (sepuluh) tahun', 'credit_points' => 1, 'satuan_hasil' => 'Tanda jasa', 'unsur_type' => 'penunjang', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'SK atau surat keterangan'],
+
+            // VII.6 Gelar Kesarjanaan Lainnya
+            ['code' => 'VII.6.a', 'category' => 'VII. Penunjang Kegiatan', 'subcategory' => 'VII.6 Gelar Kesarjanaan Lainnya', 'activity_name' => 'Memperoleh gelar kesarjanaan yang tidak sesuai dengan bidang tugas - Doktor', 'credit_points' => 15, 'satuan_hasil' => 'Ijazah', 'unsur_type' => 'penunjang', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Fotokopi ijazah yang telah disahkan'],
+            ['code' => 'VII.6.b', 'category' => 'VII. Penunjang Kegiatan', 'subcategory' => 'VII.6 Gelar Kesarjanaan Lainnya', 'activity_name' => 'Memperoleh gelar kesarjanaan yang tidak sesuai dengan bidang tugas - Magister', 'credit_points' => 10, 'satuan_hasil' => 'Ijazah', 'unsur_type' => 'penunjang', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Fotokopi ijazah yang telah disahkan'],
+            ['code' => 'VII.6.c', 'category' => 'VII. Penunjang Kegiatan', 'subcategory' => 'VII.6 Gelar Kesarjanaan Lainnya', 'activity_name' => 'Memperoleh gelar kesarjanaan yang tidak sesuai dengan bidang tugas - Sarjana/Diploma IV', 'credit_points' => 5, 'satuan_hasil' => 'Ijazah', 'unsur_type' => 'penunjang', 'pelaksana' => 'Semua jenjang', 'bukti_fisik' => 'Fotokopi ijazah yang telah disahkan'],
+        ];
     }
 }

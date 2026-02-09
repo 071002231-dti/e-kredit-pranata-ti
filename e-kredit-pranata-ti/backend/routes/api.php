@@ -9,26 +9,20 @@ use App\Http\Controllers\API\DashboardController;
 use App\Http\Controllers\API\CreditSchemaController;
 use App\Http\Controllers\API\CreditBankController;
 use App\Http\Controllers\API\SkpController;
-use App\Http\Controllers\API\WhatsAppWebhookController;
-use App\Http\Controllers\API\FlowDataController;
 
 /*
 |--------------------------------------------------------------------------
 | API Routes
 |--------------------------------------------------------------------------
+|
+| WhatsApp routes have been moved to the whatsapp-service microservice.
+| See: whatsapp-service/routes/api.php
+|
 */
 
 // Public routes (no authentication required)
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-
-// WhatsApp Webhook routes (no authentication - verified by signature)
-Route::get('/whatsapp/webhook', [WhatsAppWebhookController::class, 'verify']);
-Route::post('/whatsapp/webhook', [WhatsAppWebhookController::class, 'handle']);
-
-// WhatsApp Flow routes (no authentication - verified by signature)
-Route::post('/whatsapp/flow/data-exchange', [FlowDataController::class, 'dataExchange']);
-Route::post('/whatsapp/flow/response', [FlowDataController::class, 'handleFlowResponse']);
 
 // Public credit schema routes (for reference before login)
 Route::get('/credit-schema', [CreditSchemaController::class, 'index']);
@@ -76,8 +70,27 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Approval routes (for verifier and admin only)
     Route::prefix('approvals')->group(function () {
+        Route::get('/', [ApprovalController::class, 'index']);
         Route::get('/pending', [ApprovalController::class, 'pending']);
         Route::post('/{id}/approve', [ApprovalController::class, 'approve']);
         Route::post('/{id}/reject', [ApprovalController::class, 'reject']);
+        Route::post('/{id}/revision', [ApprovalController::class, 'revision']);
+    });
+
+    // Admin routes
+    Route::prefix('admin')->middleware('auth:sanctum')->group(function () {
+        // User management
+        Route::get('/users', [App\Http\Controllers\API\AdminUserController::class, 'index']);
+        Route::post('/users', [App\Http\Controllers\API\AdminUserController::class, 'store']);
+        Route::get('/users/{id}', [App\Http\Controllers\API\AdminUserController::class, 'show']);
+        Route::put('/users/{id}', [App\Http\Controllers\API\AdminUserController::class, 'update']);
+        Route::delete('/users/{id}', [App\Http\Controllers\API\AdminUserController::class, 'destroy']);
+
+        // Schema management
+        Route::get('/schemas', [App\Http\Controllers\API\AdminSchemaController::class, 'index']);
+        Route::post('/schemas', [App\Http\Controllers\API\AdminSchemaController::class, 'store']);
+        Route::get('/schemas/{id}', [App\Http\Controllers\API\AdminSchemaController::class, 'show']);
+        Route::put('/schemas/{id}', [App\Http\Controllers\API\AdminSchemaController::class, 'update']);
+        Route::delete('/schemas/{id}', [App\Http\Controllers\API\AdminSchemaController::class, 'destroy']);
     });
 });

@@ -14,7 +14,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            ComprehensiveCreditSchemaSeeder::class,  // Use comprehensive seeder with 70+ schemas
+            CreditSchemaSeeder::class,  // Use full schema seeder with 165 schemas based on PR No. 3 Tahun 2025
             UserSeeder::class,
         ]);
     }

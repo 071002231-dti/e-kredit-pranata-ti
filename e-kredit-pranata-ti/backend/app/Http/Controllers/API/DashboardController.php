@@ -51,7 +51,7 @@ class DashboardController extends Controller
         // Get compliance data from ComplianceService
         $complianceData = $complianceService->calculateUserCompliance($user);
         $canPromote = $complianceService->canPromote($user);
-        $nextJenjang = $complianceService->getNextJenjang($user);
+        $nextJenjang = $user->golongan ? $complianceService->getNextJenjang($user->golongan) : null;
         $recommendations = $complianceService->getRecommendations($user);
 
         // Get banked credits summary
@@ -81,24 +81,24 @@ class DashboardController extends Controller
                 ? round(($totalPoints / $user->target_angka_kredit) * 100, 2)
                 : 0,
 
-            // Compliance details from Phase 2A
+            // Compliance details from Phase 2A (using DTO)
             'compliance' => [
-                'is_compliant' => $complianceData['is_compliant'],
-                'current_utama_percentage' => $complianceData['utama_percentage'],
-                'current_penunjang_percentage' => $complianceData['penunjang_percentage'],
+                'is_compliant' => $complianceData->isCompliant,
+                'current_utama_percentage' => $complianceData->percentageUtama,
+                'current_penunjang_percentage' => $complianceData->percentagePenunjang,
                 'required_utama_min' => 80,
                 'required_penunjang_max' => 20,
             ],
 
-            // Promotion eligibility
+            // Promotion eligibility (using DTO)
             'promotion' => [
-                'can_promote' => $canPromote,
-                'next_jenjang' => $nextJenjang,
-                'credits_needed' => $nextJenjang ? ($nextJenjang['min_credits'] - $totalPoints) : 0,
+                'can_promote' => $canPromote->canPromote,
+                'next_jenjang' => $nextJenjang?->toArray(),
+                'credits_needed' => $nextJenjang ? ($nextJenjang->minCredit - $totalPoints) : 0,
             ],
 
-            // Recommendations
-            'recommendations' => $recommendations,
+            // Recommendations (convert DTOs to arrays)
+            'recommendations' => array_map(fn($rec) => $rec->toArray(), $recommendations),
 
             // Banked credits summary
             'banked_credits' => $bankedSummary,

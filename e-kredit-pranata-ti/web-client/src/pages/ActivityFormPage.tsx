@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import Select from 'react-select'
 import { Layout } from '../components/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card'
@@ -7,9 +7,9 @@ import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { Label } from '../components/ui/Label'
 import { activityService } from '../services/activityService'
-import { creditSchemaService } from '../services/creditSchemaService'
+import api from '../lib/api'
 import type { CreditSchema } from '../types'
-import { ArrowLeft, Upload, AlertTriangle, Info } from 'lucide-react'
+import { ArrowLeft, Upload, AlertTriangle, Info, RotateCcw } from 'lucide-react'
 
 interface SchemaOption {
   value: number
@@ -19,12 +19,16 @@ interface SchemaOption {
 
 export function ActivityFormPage() {
   const navigate = useNavigate()
+  const { id } = useParams<{ id: string }>()
+  const isEditMode = !!id
   const [loading, setLoading] = useState(false)
+  const [initialLoading, setInitialLoading] = useState(isEditMode)
   const [schemas, setSchemas] = useState<CreditSchema[]>([])
   const [selectedSchema, setSelectedSchema] = useState<CreditSchema | null>(null)
   const [file, setFile] = useState<File | null>(null)
   const [selectedCategory, setSelectedCategory] = useState('')
   const [selectedSubcategory, setSelectedSubcategory] = useState('')
+  const [revisionComment, setRevisionComment] = useState('')
   const [formData, setFormData] = useState({
     schema_id: '',
     title: '',
@@ -36,10 +40,55 @@ export function ActivityFormPage() {
     loadSchemas()
   }, [])
 
+  useEffect(() => {
+    if (isEditMode && schemas.length > 0) {
+      loadActivity()
+    }
+  }, [id, schemas])
+
+  const loadActivity = async () => {
+    if (!id) return
+    setInitialLoading(true)
+    try {
+      const { data } = await api.get(`/activities/${id}`)
+      const activity = data.data || data
+
+      // Set form data
+      setFormData({
+        schema_id: activity.schema_id?.toString() || '',
+        title: activity.title || '',
+        description: activity.description || '',
+      })
+
+      // Find and set the schema
+      if (activity.schema_id) {
+        const schema = schemas.find(s => s.id === activity.schema_id)
+        if (schema) {
+          setSelectedSchema(schema)
+          setSelectedCategory(schema.category)
+          setSelectedSubcategory(schema.subcategory)
+        }
+      }
+
+      // Get latest revision comment from approvals
+      if (activity.approvals && activity.approvals.length > 0) {
+        const latestApproval = activity.approvals[activity.approvals.length - 1]
+        if (latestApproval.status === 'revision' && latestApproval.comments) {
+          setRevisionComment(latestApproval.comments)
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load activity:', err)
+      setError('Gagal memuat data aktivitas')
+    } finally {
+      setInitialLoading(false)
+    }
+  }
+
   const loadSchemas = async () => {
     try {
-      const data = await creditSchemaService.getCreditSchemas({ per_page: 100 })
-      setSchemas(data.data)
+      const { data } = await api.get('/credit-schema', { params: { paginate: 'false' } })
+      setSchemas(Array.isArray(data) ? data : data.data || [])
     } catch (error) {
       console.error('Failed to load schemas:', error)
     }
@@ -138,10 +187,19 @@ export function ActivityFormPage() {
         formDataToSend.append('proof_file', file)
       }
 
-      const response = await activityService.createActivity(formDataToSend)
+      let response
+      if (isEditMode && id) {
+        // Update existing activity and resubmit for review
+        formDataToSend.append('_method', 'PUT')
+        response = await api.post(`/activities/${id}`, formDataToSend, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        })
+      } else {
+        response = await activityService.createActivity(formDataToSend)
+      }
 
       // Check if credits will be banked and show warning
-      if (response.banking_info?.will_be_banked) {
+      if (response?.banking_info?.will_be_banked) {
         alert(`⚠️ Perhatian: ${response.banking_info.warning}`)
       }
 
@@ -166,10 +224,27 @@ export function ActivityFormPage() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Tambah Aktivitas</h1>
-            <p className="text-gray-500 mt-1">Buat pengajuan aktivitas baru</p>
+            <h1 className="text-3xl font-bold text-gray-900">
+              {isEditMode ? 'Perbaiki Aktivitas' : 'Tambah Aktivitas'}
+            </h1>
+            <p className="text-gray-500 mt-1">
+              {isEditMode ? 'Perbaiki dan ajukan ulang aktivitas' : 'Buat pengajuan aktivitas baru'}
+            </p>
           </div>
         </div>
+
+        {/* Revision Comment Alert */}
+        {isEditMode && revisionComment && (
+          <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
+            <div className="flex items-start gap-3">
+              <RotateCcw className="h-5 w-5 text-orange-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <h4 className="font-semibold text-orange-900">Catatan Perbaikan dari Verifikator:</h4>
+                <p className="text-orange-800 mt-1">{revisionComment}</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Form */}
         <Card>
@@ -399,13 +474,13 @@ export function ActivityFormPage() {
                   type="button"
                   variant="outline"
                   onClick={() => navigate('/activities')}
-                  disabled={loading}
+                  disabled={loading || initialLoading}
                   className="flex-1"
                 >
                   Batal
                 </Button>
-                <Button type="submit" disabled={loading} className="flex-1">
-                  {loading ? 'Menyimpan...' : 'Simpan Aktivitas'}
+                <Button type="submit" disabled={loading || initialLoading} className="flex-1">
+                  {loading ? 'Menyimpan...' : isEditMode ? 'Ajukan Ulang' : 'Simpan Aktivitas'}
                 </Button>
               </div>
             </form>

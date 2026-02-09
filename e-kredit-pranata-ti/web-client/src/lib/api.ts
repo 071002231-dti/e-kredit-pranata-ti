@@ -1,7 +1,21 @@
 import axios, { AxiosError } from 'axios'
 import type { ApiError } from '../types'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost/api'
+// Determine API URL based on environment
+const getApiUrl = () => {
+  // If VITE_API_URL is set, use it
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL
+  }
+  // In production, API is at same origin under /ccp/api
+  if (import.meta.env.PROD) {
+    return '/ccp/api'
+  }
+  // Development default
+  return 'http://localhost:8000/api'
+}
+
+const API_URL = getApiUrl()
 
 export const api = axios.create({
   baseURL: API_URL,
@@ -9,6 +23,7 @@ export const api = axios.create({
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
+  withCredentials: true,
 })
 
 // Request interceptor - Add auth token
@@ -33,7 +48,9 @@ api.interceptors.response.use(
       // Token expired or invalid
       localStorage.removeItem('auth_token')
       localStorage.removeItem('user')
-      window.location.href = '/login'
+      // Redirect to login with correct base path
+      const basePath = import.meta.env.BASE_URL || '/'
+      window.location.href = `${basePath}login`
     }
     return Promise.reject(error)
   }

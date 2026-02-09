@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Layout } from '../components/Layout'
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card'
+import { Card, CardContent } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 import { skpService, type Skp } from '../services/skpService'
 import {
@@ -9,8 +9,6 @@ import {
   Calendar,
   Target,
   FileText,
-  CheckCircle,
-  Clock,
   Trash2,
   Eye
 } from 'lucide-react'

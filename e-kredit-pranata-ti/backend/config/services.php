@@ -35,4 +35,32 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | WhatsApp Microservice
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for the WhatsApp microservice that handles all
+    | WhatsApp Cloud API communication and message handling.
+    |
+    */
+    'whatsapp_service' => [
+        'url' => env('WHATSAPP_SERVICE_URL', 'http://whatsapp-service:8080'),
+        'key' => env('WHATSAPP_SERVICE_KEY'),
+        'timeout' => env('WHATSAPP_SERVICE_TIMEOUT', 10),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Internal API
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for internal service-to-service communication.
+    | Used by microservices to call main app APIs.
+    |
+    */
+    'internal_api' => [
+        'key' => env('INTERNAL_API_KEY'),
+    ],
+
 ];

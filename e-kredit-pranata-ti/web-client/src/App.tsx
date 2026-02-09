@@ -9,10 +9,16 @@ import { ActivityFormPage } from './pages/ActivityFormPage'
 import { CreditBankPage } from './pages/CreditBankPage'
 import { SkpListPage } from './pages/SkpListPage'
 import { SkpFormPage } from './pages/SkpFormPage'
+import { ApprovalsPage } from './pages/ApprovalsPage'
+import { UsersPage } from './pages/UsersPage'
+import { SchemasPage } from './pages/SchemasPage'
+
+// Get basename from Vite's base config (production: /ccp, development: /)
+const basename = import.meta.env.BASE_URL
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={basename}>
       <AuthProvider>
         <Routes>
           {/* Public routes */}
@@ -38,6 +44,14 @@ function App() {
           />
           <Route
             path="/activities/new"
+            element={
+              <ProtectedRoute>
+                <ActivityFormPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/activities/:id/edit"
             element={
               <ProtectedRoute>
                 <ActivityFormPage />
@@ -73,6 +87,34 @@ function App() {
             element={
               <ProtectedRoute>
                 <SkpFormPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Verifier & Admin routes */}
+          <Route
+            path="/approvals"
+            element={
+              <ProtectedRoute>
+                <ApprovalsPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Admin only routes */}
+          <Route
+            path="/admin/schemas"
+            element={
+              <ProtectedRoute>
+                <SchemasPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/users"
+            element={
+              <ProtectedRoute>
+                <UsersPage />
               </ProtectedRoute>
             }
           />
