@@ -21,6 +21,7 @@ interface Activity {
     id: number
     category: string
     subcategory: string
+    subcategory_name?: string
     activity_name: string
     credit_points: string
     unsur_type: string
@@ -195,7 +196,7 @@ export function ApprovalsPage() {
                         </td>
                         <td className="py-3">
                           <p className="text-xs">{activity.schema?.category}</p>
-                          <p className="text-xs text-gray-500">{activity.schema?.subcategory}</p>
+                          <p className="text-xs text-gray-500">{activity.schema?.subcategory_name || activity.schema?.subcategory}</p>
                         </td>
                         <td className="py-3">
                           <span className="font-medium text-blue-600">{activity.schema?.credit_points}</span>
@@ -278,7 +279,7 @@ export function ApprovalsPage() {
                     </div>
                     <div>
                       <p className="text-gray-500">Sub Kategori</p>
-                      <p className="font-medium">{selectedActivity.schema?.subcategory}</p>
+                      <p className="font-medium">{selectedActivity.schema?.subcategory_name || selectedActivity.schema?.subcategory}</p>
                     </div>
                     <div>
                       <p className="text-gray-500">Angka Kredit</p>

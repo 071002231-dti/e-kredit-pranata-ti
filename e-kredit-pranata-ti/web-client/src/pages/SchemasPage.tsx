@@ -11,6 +11,7 @@ interface CreditSchema {
   id: number
   category: string
   subcategory: string
+  subcategory_name?: string
   activity_name: string
   credit_points: string
   satuan_hasil: string
@@ -272,7 +273,7 @@ export function SchemasPage() {
                         </td>
                         <td className="py-3">
                           <p className="text-sm">{schema.category}</p>
-                          <p className="text-xs text-gray-500">{schema.subcategory}</p>
+                          <p className="text-xs text-gray-500">{schema.subcategory_name || schema.subcategory}</p>
                         </td>
                         <td className="py-3">
                           <span className="font-medium text-blue-600">{schema.credit_points}</span>
