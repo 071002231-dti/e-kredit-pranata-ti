@@ -36,6 +36,7 @@ export interface CreditSchema {
   id: number
   category: string
   subcategory: string
+  subcategory_name?: string
   activity_name: string
   credit_points: string
   satuan_hasil: string

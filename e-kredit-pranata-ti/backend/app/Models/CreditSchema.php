@@ -12,6 +12,7 @@ class CreditSchema extends Model
         'code',
         'category',
         'subcategory',
+        'subcategory_name',
         'activity_name',
         'credit_points',
         'description',

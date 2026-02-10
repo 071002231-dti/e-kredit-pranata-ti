@@ -50,10 +50,54 @@ class ComprehensiveCreditSchemaSeeder extends Seeder
         );
 
         foreach ($schemas as $schema) {
+            // Auto-populate subcategory_name if not explicitly set
+            if (isset($schema['subcategory']) && !isset($schema['subcategory_name'])) {
+                $schema['subcategory_name'] = $this->getSubcategoryName($schema['subcategory']);
+            }
             CreditSchema::create($schema);
         }
 
         $this->command->info('Complete Credit Schemas seeded: ' . count($schemas) . ' items');
+    }
+
+    /**
+     * Map subcategory codes to official names from PR No. 3 Tahun 2025
+     */
+    private function getSubcategoryName(string $code): ?string
+    {
+        $mapping = [
+            'I.1' => 'Pendidikan sekolah dan memperoleh gelar/ijazah',
+            'I.2' => 'Pendidikan dan Pelatihan Fungsional',
+            'II.1' => 'Implementasi Sistem Komputer dan Program Paket',
+            'II.2' => 'Implementasi Basisdata',
+            'II.3' => 'Implementasi Sistem Jaringan Komputer',
+            'II.4' => 'Implementasi Layanan Teknologi Informasi',
+            'III.1' => 'Analisis Sistem Komputer dan Program Paket',
+            'III.2' => 'Analisis Basisdata',
+            'III.3' => 'Analisis Sistem Jaringan Komputer',
+            'III.4' => 'Analisis Layanan Teknologi Informasi',
+            'III.5' => 'Pemodelan Sistem',
+            'III.6' => 'Analisis dan Perancangan Sistem Keamanan Informasi',
+            'IV.1' => 'Penyusunan Naskah Kebijakan Teknologi Informasi',
+            'IV.2' => 'Penyusunan Kebijakan, Pedoman dan Petunjuk Teknis',
+            'IV.3' => 'Perencanaan Strategis Sistem Informasi',
+            'IV.4' => 'Tata Kelola Teknologi Informasi',
+            'V.1' => 'Penyusunan Makalah',
+            'V.2' => 'Penulisan Buku',
+            'V.3' => 'Pembuatan Karya Tulis/Karya Ilmiah Populer',
+            'V.4' => 'Presentasi/Ceramah/Penyuluhan',
+            'V.5' => 'Penerjemahan/Penyaduran Buku dan Karya Ilmiah',
+            'V.6' => 'Keanggotaan dalam Tim Penilai',
+            'V.7' => 'Perolehan Penghargaan/Tanda Jasa',
+            'V.8' => 'Pendidikan dan Pelatihan di Bidang Teknologi Informasi',
+            'VI.1' => 'Kegiatan Dakwah Islamiyah',
+            'VII.1' => 'Pengajar/Pelatih di Bidang Teknologi Informasi',
+            'VII.2' => 'Keanggotaan dalam Organisasi Profesi',
+            'VII.3' => 'Kegiatan Penunjang Pranata TI Lainnya',
+            'VII.4' => 'Perolehan Gelar/Ijazah Kesarjanaan Lainnya',
+        ];
+
+        return $mapping[$code] ?? null;
     }
 
     /**

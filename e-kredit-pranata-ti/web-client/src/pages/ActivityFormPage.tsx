@@ -292,11 +292,14 @@ export function ActivityFormPage() {
                     disabled={loading}
                   >
                     <option value="">-- Pilih Sub Kategori --</option>
-                    {subcategories.map((subcategory) => (
-                      <option key={subcategory} value={subcategory}>
-                        {subcategory}
-                      </option>
-                    ))}
+                    {subcategories.map((subcategory) => {
+                      const schema = schemas.find(s => s.subcategory === subcategory);
+                      return (
+                        <option key={subcategory} value={subcategory}>
+                          {schema?.subcategory_name || subcategory}
+                        </option>
+                      );
+                    })}
                   </select>
                 </div>
               )}
@@ -337,7 +340,7 @@ export function ActivityFormPage() {
                       </div>
                       <div>
                         <span className="text-gray-600">Sub Kategori:</span>{' '}
-                        <span className="font-medium">{selectedSchema.subcategory}</span>
+                        <span className="font-medium">{selectedSchema.subcategory_name || selectedSchema.subcategory}</span>
                       </div>
                       <div>
                         <span className="text-gray-600">Angka Kredit:</span>{' '}
