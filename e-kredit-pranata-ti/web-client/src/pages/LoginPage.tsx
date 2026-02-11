@@ -53,7 +53,7 @@ export function LoginPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="user@example.com"
+                placeholder="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -77,15 +77,6 @@ export function LoginPage() {
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? 'Loading...' : 'Login'}
             </Button>
-
-            <div className="pt-4 border-t">
-              <p className="text-xs text-gray-500 mb-2">Test Users:</p>
-              <div className="text-xs space-y-1 text-gray-600">
-                <div>Admin: admin@example.com / password</div>
-                <div>Verifier: verifier@example.com / password</div>
-                <div>User: user@example.com / password</div>
-              </div>
-            </div>
           </form>
         </CardContent>
       </Card>
