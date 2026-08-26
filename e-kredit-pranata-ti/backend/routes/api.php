@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\API\SsoAuthController;
 use App\Http\Controllers\API\ActivityController;
 use App\Http\Controllers\API\ApprovalController;
 use App\Http\Controllers\API\DashboardController;
@@ -23,6 +24,25 @@ use App\Http\Controllers\API\SkpController;
 // Public routes (no authentication required)
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+
+// SSO Authentication routes
+Route::prefix('auth/sso')->group(function () {
+    // Initiate SSO login (unprotected)
+    Route::get('/initiate', [SsoAuthController::class, 'initiateLogin']);
+
+    // SSO login callback (protected by Shibboleth via Nginx)
+    // Mock headers enabled via ?mock_sso=1 in development
+    Route::get('/login', [SsoAuthController::class, 'login'])
+        ->middleware('mock.shibboleth');
+
+    // SSO logout (requires authentication)
+    Route::post('/logout', [SsoAuthController::class, 'logout'])
+        ->middleware('auth:sanctum');
+
+    // Debug endpoint (development only)
+    Route::get('/debug', [SsoAuthController::class, 'debug'])
+        ->middleware('mock.shibboleth');
+});
 
 // Public credit schema routes (for reference before login)
 Route::get('/credit-schema', [CreditSchemaController::class, 'index']);

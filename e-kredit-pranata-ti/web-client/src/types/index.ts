@@ -1,12 +1,17 @@
 export interface User {
   id: number
   nip: string
+  nip_sso?: string
+  sso_uid?: string
   name: string
   email: string
   role: 'user' | 'verifier' | 'admin'
   position: string
   unit_kerja: string
   jenjang_jabatan?: string
+  affiliation?: string
+  auth_method: 'local' | 'sso' | 'hybrid'
+  sso_last_login?: string
   created_at: string
   updated_at: string
 }

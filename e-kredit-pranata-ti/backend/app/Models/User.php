@@ -20,6 +20,8 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'nip',
+        'nip_sso',
+        'sso_uid',
         'name',
         'email',
         'password',
@@ -28,6 +30,9 @@ class User extends Authenticatable
         'unit_kerja',
         'jenjang_jabatan',
         'golongan',
+        'affiliation',
+        'auth_method',
+        'sso_last_login',
         'target_angka_kredit',
         'angka_kredit_minimal',
         // Credit tracking fields
@@ -64,6 +69,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'sso_last_login' => 'datetime',
             'target_angka_kredit' => 'decimal:2',
             'angka_kredit_minimal' => 'decimal:2',
             'current_credit_utama' => 'decimal:2',

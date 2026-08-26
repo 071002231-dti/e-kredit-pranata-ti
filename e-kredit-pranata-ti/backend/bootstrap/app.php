@@ -20,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'internal.service' => \App\Http\Middleware\VerifyInternalServiceKey::class,
+            'mock.shibboleth' => \App\Http\Middleware\MockShibbolethHeaders::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
