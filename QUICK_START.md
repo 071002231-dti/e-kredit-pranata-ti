@@ -1,118 +1,162 @@
-# Panduan Cepat — E-Kredit Pranata TI
+# ⚡ Quick Start Guide
 
-Aplikasi perhitungan angka kredit jabatan fungsional Pranata TI. Terdiri dari backend Laravel (SQLite) dan frontend React/Vite.
+**Last Session**: 2025-11-06
+**Status**: Docker Setup Complete ✅
 
 ---
 
-## Prasyarat
+## 🚀 Resume Development (Setelah Buka Laptop)
 
-- PHP 8.2+ dengan ekstensi `pdo`, `pdo_sqlite`, `mbstring`, `openssl`, `xml`, `ctype`
-- Composer 2+
-- Node.js 20+ dan npm
-
-Cek versi:
+### 1. Start Docker Containers
 ```bash
-php -v && composer --version && node -v && npm -v
+cd /Users/4h3/myproject/e-kredit-pranata-ti/backend
+./vendor/bin/sail up -d
+```
+
+### 2. Verify Containers Running
+```bash
+docker ps
+```
+Expected: 2 containers (backend-laravel.test-1, backend-mysql-1)
+
+### 3. Test Backend
+```bash
+curl http://localhost
+```
+Expected: Laravel welcome page HTML
+
+---
+
+## 📂 Documentation Files
+
+| File | Purpose |
+|------|---------|
+| **TODO.md** | Full development roadmap & task list |
+| **DOCKER_COMMANDS.md** | Complete Docker & Sail commands reference |
+| **DATABASE_SCHEMA.md** | Complete database schema with ERD |
+| **QUICK_START.md** | This file (quick reference) |
+
+---
+
+## 🎯 Next Steps (Choose One)
+
+### Option 1: Database First (Recommended)
+```
+1. Create migrations
+2. Create seeders
+3. Run migrate + seed
+4. Verify data in MySQL
+```
+**Estimated Time**: 1-2 hours
+
+### Option 2: Backend API First
+```
+1. Implement AuthController
+2. Test with Postman
+3. Implement ActivityController
+4. Implement ApprovalController
+```
+**Estimated Time**: 2-3 hours
+
+### Option 3: Full Stack
+```
+1. Do Option 1 (Database)
+2. Do Option 2 (Backend API)
+3. Setup Frontend React
+4. Integration testing
+```
+**Estimated Time**: 6-9 hours
+
+---
+
+## 📋 Chat Prompt for Next Session
+
+Copy-paste this when you start a new session:
+
+```
+Saya sudah setup Docker untuk project e-kredit-pranata-ti.
+Laravel 12 + PHP 8.3 dan MySQL 8.0 sudah running.
+
+Lihat file TODO.md untuk detail progress yang sudah selesai.
+
+Saya ingin lanjutkan dengan [pilih]:
+1. Implementasi database migrations & seeders
+2. Implementasi backend API controllers
+3. Setup frontend React
+4. Testing & debugging
+
+Tolong bantu dari langkah pertama.
 ```
 
 ---
 
-## 1. Jalankan Backend
+## 🔧 Troubleshooting
 
+### Containers Not Running?
 ```bash
-cd e-kredit-pranata-ti/backend
-
-# Install dependensi (hanya pertama kali atau setelah update)
-composer install
-
-# Salin konfigurasi environment
-cp .env.example .env
-
-# Generate app key
-php artisan key:generate
-
-# Buat database SQLite dan jalankan migrasi
-touch database/database.sqlite
-php artisan migrate
-
-# Isi data awal (akun pengguna)
-php artisan db:seed
-
-# Jalankan server
-php artisan serve
+./vendor/bin/sail down
+./vendor/bin/sail up -d
 ```
 
-Server berjalan di **http://localhost:8000**
-
-> Biarkan terminal ini tetap terbuka.
-
----
-
-## 2. Jalankan Frontend
-
-Buka terminal baru:
-
+### Port 80 Busy?
 ```bash
-cd e-kredit-pranata-ti/web-client
-
-# Install dependensi (hanya pertama kali)
-npm install
-
-# Jalankan dev server
-npm run dev
+sudo lsof -i :80
+# Kill the process using port 80
 ```
 
-Frontend berjalan di **http://localhost:5173**
-
-> `VITE_API_URL` otomatis mengarah ke `http://localhost:8000/api` saat mode development — tidak perlu konfigurasi tambahan.
-
----
-
-## 3. Buka di Browser
-
-Buka: **http://localhost:5173**
+### Database Connection Error?
+```bash
+docker restart backend-mysql-1
+./vendor/bin/sail logs mysql
+```
 
 ---
 
-## 4. Akun Demo
+## 📞 Useful Commands
 
-Semua akun dibuat oleh seeder dengan password default `password`:
+```bash
+# Check container status
+docker ps
 
-| Email | Role | Jabatan |
-|-------|------|---------|
-| `admin@example.com` | admin | Kepala Bidang IT (Pranata TI Utama) |
-| `verifier@example.com` | verifier | Pranata TI Ahli Madya |
-| `user@example.com` | user | Pranata TI Ahli Muda |
-| `pertama@example.com` | user | Pranata TI Ahli Pertama |
-| `pelaksana@example.com` | user | Pranata TI Pelaksana |
+# View logs
+./vendor/bin/sail logs -f
 
-Login dengan salah satu akun di atas, lalu masukkan password `password`.
+# Access container shell
+./vendor/bin/sail shell
 
----
+# Run migrations
+./vendor/bin/sail artisan migrate
 
-## 5. Fitur Utama
-
-Setelah login, jelajahi:
-
-| Menu | Deskripsi |
-|------|-----------|
-| **Dashboard** | Ringkasan angka kredit dan status pengajuan |
-| **Daftar Aktivitas** | Riwayat kegiatan yang telah diinput |
-| **Input Aktivitas Baru** | Form pengisian butir kegiatan angka kredit |
-| **Approval** *(login verifier/admin)* | Menyetujui atau menolak pengajuan |
-| **Kelola Skema** *(login admin)* | Manajemen skema penilaian |
-| **Kelola Pengguna** *(login admin)* | Manajemen akun pengguna |
-
-Alur utama:
-1. Login sebagai `user@example.com` → input aktivitas baru
-2. Login sebagai `verifier@example.com` → approve aktivitas
-3. Login sebagai `admin@example.com` → lihat ringkasan dan kelola skema
+# Access MySQL
+./vendor/bin/sail mysql
+```
 
 ---
 
-## Catatan
+## ✅ Current Setup
 
-- Database SQLite disimpan di `e-kredit-pranata-ti/backend/database/database.sqlite`
-- Untuk reset data: `php artisan migrate:fresh --seed`
-- Log error ada di `e-kredit-pranata-ti/backend/storage/logs/laravel.log`
-- Laporan angka kredit: [`credit_point/e_kredit/LAPORAN_RESMI_PENGAJUAN_ANGKA_KREDIT.md`](../../credit_point/e_kredit/LAPORAN_RESMI_PENGAJUAN_ANGKA_KREDIT.md)
+- ✅ Docker & Docker Compose installed
+- ✅ Laravel Sail configured
+- ✅ PHP 8.3 container built & running
+- ✅ MySQL 8.0 container running & healthy
+- ✅ Backend accessible at http://localhost
+- ✅ Environment variables configured
+
+---
+
+## 🎯 Priority Next Task
+
+**→ Create Database Migrations**
+
+This is the foundation for everything else. Start here!
+
+See **TODO.md** Phase 1 for detailed instructions.
+
+---
+
+**Happy Coding! 🚀**
+
+For detailed documentation, see:
+- Full roadmap: `TODO.md`
+- Docker commands: `DOCKER_COMMANDS.md`
+- Database schema: `DATABASE_SCHEMA.md`

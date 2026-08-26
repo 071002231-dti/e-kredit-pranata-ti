@@ -1,5 +1,3 @@
-version: "3.9"
-
 # FTI Multi-App Ecosystem - Local Development Docker Compose
 # This configuration brings up all shared infrastructure + example services
 # Individual apps can override with their own docker-compose.yml files
